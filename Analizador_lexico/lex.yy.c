@@ -809,106 +809,106 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 #line 31 "practica_2.l"
-return INI_PARENTESIS;
+printf("lexema = '%s', token = 'INI_PARENTESIS'\n", yytext);    return INI_PARENTESIS;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 32 "practica_2.l"
-return FIN_PARENTESIS;
+printf("lexema = '%s', token = 'FIN_PARENTESIS'\n", yytext);    return FIN_PARENTESIS;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 33 "practica_2.l"
-return INI_BLOQUE;
+printf("lexema = '%s', token = 'INI_BLOQUE'\n", yytext);        return INI_BLOQUE;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 34 "practica_2.l"
-return FIN_BLOQEU;
+printf("lexema = '%s', token = 'FIN_BLOQUE'\n", yytext);        return FIN_BLOQUE;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 35 "practica_2.l"
-return INI_AGREGADO;
+printf("lexema = '%s', token = 'INI_AGREGADO'\n", yytext);      return INI_AGREGADO;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 36 "practica_2.l"
-return FIN_AGREGAD;
+printf("lexema = '%s', token = 'FIN_AGREGADO'\n", yytext);      return FIN_AGREGADO;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 37 "practica_2.l"
-return PUNTOYCOMA;
+printf("lexema = '%s', token = 'PUNTOYCOMA'\n", yytext);        return PUNTOYCOMA;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 38 "practica_2.l"
-return OP_ASIGNACION;
+printf("lexema = '%s', token = 'OP_ASIGNACION'\n", yytext);     return OP_ASIGNACION;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 39 "practica_2.l"
-return BUCLE_SI;
+printf("lexema = '%s', token = 'BUCLE_SI'\n", yytext);          return BUCLE_SI;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 40 "practica_2.l"
-return BUCLE_PARA;
+printf("lexema = '%s', token = 'BUCLE_PARA'\n", yytext);        return BUCLE_PARA;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 41 "practica_2.l"
-return BUCLE_MIENTRAS;
+printf("lexema = '%s', token = 'BUCLE_MIENTRAS'\n", yytext);    return BUCLE_MIENTRAS;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 42 "practica_2.l"
-return ENCONCES;
+printf("lexema = '%s', token = 'ENTONCES'\n", yytext);          return ENTONCES;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 43 "practica_2.l"
-return DECL_LISTAS;
+printf("lexema = '%s', token = 'DECL_LISTAS'\n", yytext);       return DECL_LISTAS;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 46 "practica_2.l"
-return OP_ARITMETICA;
+#line 45 "practica_2.l"
+printf("lexema = '%s', token = 'OP_ARITMETICA'\n", yytext);     return OP_ARITMETICA;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 47 "practica_2.l"
-return OP_LOGICO;
+#line 46 "practica_2.l"
+printf("lexema = '%s', token = 'OP_LOGICO'\n", yytext);         return OP_LOGICO;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 48 "practica_2.l"
-return OP_UNARIO;
+#line 47 "practica_2.l"
+printf("lexema = '%s', token = 'OP_UNARIO'\n", yytext);         return OP_UNARIO;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 49 "practica_2.l"
-return TIPO_VAR;
+#line 48 "practica_2.l"
+printf("lexema = '%s', token = 'TIPO_VAR'\n", yytext);          return TIPO_VAR;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 50 "practica_2.l"
-return NUMERO;
+#line 49 "practica_2.l"
+printf("lexema = '%s', token = 'NUMERO'\n", yytext);            return NUMERO;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 51 "practica_2.l"
-return ID;
+#line 50 "practica_2.l"
+printf("lexema = '%s', token = 'ID'\n", yytext);                return ID;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 54 "practica_2.l"
-printf("Simbolo erroneo: '%s' en linea: %d\n", yytext, numlinea);
+#line 53 "practica_2.l"
+printf("Simbolo erroneo: '%s' en linea: %d\n", yytext, num_lineas);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 56 "practica_2.l"
+#line 55 "practica_2.l"
 ECHO;
 	YY_BREAK
 #line 915 "lex.yy.c"
@@ -1909,6 +1909,37 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 56 "practica_2.l"
+#line 55 "practica_2.l"
 
 
+
+int main (int argc, char** argv) {
+
+	if (argc <= 1) {
+
+        printf("\nError: falta archivo a leer\n");
+		exit(-1);
+
+	}
+
+    // Se abre el fichero recibido por parámetro
+    yyin = fopen(argv[1], "r");
+
+    // Si "yyin" es nulo no se ha podido abrir el fichero
+    if (yyin == NULL) {
+
+        printf ("\nError abriendo el archivo %s\n", argv[1]);
+
+        exit (-1);
+
+    }
+
+	int siguiente_token = yylex();
+
+	while (siguiente_token != 0) {
+		siguiente_token = yylex();
+	}
+
+	exit(1);
+
+}

@@ -9,7 +9,9 @@ main(){
 		numero = numero * numero;
 		return numero;
 	}
-	
+
+	.
+
 	para contador := 0 sube hasta 1 haz 
 		var1 = var1 + 1;
 		
