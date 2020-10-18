@@ -50,23 +50,21 @@ OPE_UNI_BIN ("no"|"!"|"-")
 {IDENTIFICADOR}             printf("lexema = '%s', token = 'ID'\n", yytext);                return ID;
 
 
-.                           printf("Simbolo erroneo: '%s' en linea: %d\n", yytext, num_lineas);
+.                           printf("\033[1;31mError:  \033[0m Simbolo erroneo: '%s' en linea: %d\n", yytext, num_lineas);
 
 %%
 
 int main (int argc, char** argv) {
 
-	if (argc <= 1) {
+    // Esta parte se encarga de leer el fichero de entrada, token por token 
 
+	if (argc <= 1) {
         printf("\nError: falta archivo a leer\n");
 		exit(-1);
-
 	}
 
-    // Se abre el fichero recibido por parámetro
     yyin = fopen(argv[1], "r");
 
-    // Si "yyin" es nulo no se ha podido abrir el fichero
     if (yyin == NULL) {
 
         printf ("\nError abriendo el archivo %s\n", argv[1]);
