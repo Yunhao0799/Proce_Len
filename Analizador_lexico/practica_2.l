@@ -1,13 +1,12 @@
 %{
-#include <stdlib.h>
-#include <string.h>
-#include "tokens.h"
+    #include <stdlib.h>
+    #include <string.h>
+    #include "tokens.h"
 
-int num_lineas = 1;
+    int num_lineas = 1;
 %}
 
 /* --- Inicio declaraciones Flex --- */
-%x ml_comment
 
 LETRA[a-zA-Z]
 DIGITO[0-9]
