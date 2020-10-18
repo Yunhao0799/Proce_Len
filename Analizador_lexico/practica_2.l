@@ -14,12 +14,12 @@ DIGITO[0-9]
 ENTERO {DIGITO}+
 REAL {ENTERO}.{ENTERO}
 IDENTIFICADOR {LETRA}({DIGITO}|{LETRA})*
-OPE_ARITMETICA ("+" | "-" | "*" | "/" | "%" | "@" | "--")
-OPE_LOGICO ("&&"" | "||" | "y" | "o" | "xor")
-OPE_UNARIO ("++" | "--" | "#" | "?" | "**" | "<<" | ">>" | "$")
+OPE_ARITMETICA ("+"|"-"|"*"|"/"|"%"|"@"|"--")
+OPE_LOGICO ("&&"|"||"|"y"|"o"|"xor")
+OPE_UNARIO ("++"|"--"|"#"|"?"|"**"|"<<"|">>"|"$")
 COMENTARIO_UNA_LINEA "//".*"\n"
-TIPO_VARIABLE ("bool" | "caracter" | "real" | "entero" | "real")
-OPE_UNI_BIN ("no" | "!" | "-")
+TIPO_VARIABLE ("bool"|"caracter"|"real"|"entero")
+OPE_UNI_BIN ("no"|"!"|"-")
 
 /* --- Fin declaraciones Flex ---*/
 
@@ -42,12 +42,14 @@ OPE_UNI_BIN ("no" | "!" | "-")
 "entonces"                  return ENCONCES;
 "lista de"                  return DECL_LISTAS;
 
+
 {OPE_ARITMETICA}            return OP_ARITMETICA;
 {OPE_LOGICO}                return OP_LOGICO;
 {OPE_UNARIO}                return OP_UNARIO;
 {TIPO_VARIABLE}             return TIPO_VAR;
-({ENTERO} | {REAL})         return NUMERO;
+({ENTERO}|{REAL})           return NUMERO;
 {IDENTIFICADOR}             return ID;
+
 
 .                           printf("Simbolo erroneo: '%s' en linea: %d\n", yytext, numlinea);
 
