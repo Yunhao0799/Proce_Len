@@ -1,9 +1,11 @@
 %{
-    #include <stdlib.h>
-    #include <string.h>
-    #include "tokens.h"
 
-    int num_lineas = 1;
+#include <stdlib.h>
+#include <string.h>
+#include "tokens.h"
+
+int num_lineas = 1;
+
 %}
 
 /* --- Inicio declaraciones Flex --- */
