@@ -35,12 +35,12 @@
 #define OP_UNI_BIN     275
 #define TIPO_VAR       276
 #define ID             277
-#define DOSPUNTOS      278
-#define COMA           279
-#define LLEGADAFOR     280
-#define FINFOR         281
+#define COMA           278
+#define DOSPUNTOS      279
+#define RETURN         280
+#define MODO_FOR       281
 #define CONSTANTE      282
-#define INICOMILLAS    283
-#define FINCOMILLAS    284
+#define COMILLAS       283
+#define FINFOR         284
 
 #endif

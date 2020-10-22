@@ -1,5 +1,5 @@
 FLAGS = -lfl
-FUENTE = fuente.c
+FUENTE = practica2.c
 
 
 programa: limpiar lex compilar
@@ -8,7 +8,7 @@ lex: #(FUENTE)
 	flex #(FUENTE)
 
 compilar: lex.yy.c
-	gcc -lfl -o ejecutable lex.yy.c
+	gcc -lfl -o analizador lex.yy.c
 
 limpiar:
-	rm -f lex.yy.c ejecutable
+	rm -f lex.yy.c analizador
