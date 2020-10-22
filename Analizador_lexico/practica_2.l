@@ -21,6 +21,7 @@ OPE_UNARIO ("++"|"--"|"#"|"?"|"**"|"<<"|">>"|"$")
 COMENTARIO_UNA_LINEA "//".*"\n"
 TIPO_VARIABLE ("bool"|"caracter"|"real"|"entero")
 OPE_UNI_BIN ("no"|"!"|"-")
+LLEGADAFOR ("sube hasta" | "baja hasta")
 
 /* --- Fin declaraciones Flex ---*/
 
@@ -42,6 +43,12 @@ OPE_UNI_BIN ("no"|"!"|"-")
 "mientras"                  printf("lexema = '%s', token = 'BUCLE_MIENTRAS'\n", yytext);    return BUCLE_MIENTRAS;
 "entonces"                  printf("lexema = '%s', token = 'ENTONCES'\n", yytext);          return ENTONCES;
 "lista de"                  printf("lexema = '%s', token = 'DECL_LISTAS'\n", yytext);       return DECL_LISTAS;
+":"							printf("lexema = '%s', token = 'DOSPUNTOS'\n", yytext);         return DOSPUNTOS;
+","							printf("lexema = '%s', token = 'COMA'\n", yytext); 		        return COMA;
+"haz"						printf("lexema = '%s', token = 'FINFOR'\n", yytext);  	        return FINFOR;
+"constante"					printf("lexema = '%s', token = 'CONSTANTE'\n", yytext);         return CONSTANTE;
+"""							printf("lexema = '%s', token = 'INICOMILLAS'\n", yytext);       return INICOMILLAS;
+"""							printf("lexema = '%s', token = 'FINCOMILLAS'\n", yytext);       return FINCOMILLAS;
 
 {OPE_ARITMETICA}            printf("lexema = '%s', token = 'OP_ARITMETICA'\n", yytext);     return OP_ARITMETICA;
 {OPE_LOGICO}                printf("lexema = '%s', token = 'OP_LOGICO'\n", yytext);         return OP_LOGICO;
@@ -49,6 +56,7 @@ OPE_UNI_BIN ("no"|"!"|"-")
 {TIPO_VARIABLE}             printf("lexema = '%s', token = 'TIPO_VAR'\n", yytext);          return TIPO_VAR;
 ({ENTERO}|{REAL})           printf("lexema = '%s', token = 'NUMERO'\n", yytext);            return NUMERO;
 {IDENTIFICADOR}             printf("lexema = '%s', token = 'ID'\n", yytext);                return ID;
+{LLEGADAFOR}				printf("lexema = '%s', token = 'LLEGADAFOR'\n", yytext);        return LLEGADAFOR;
 
 
 .                           printf("\033[1;31mError:  \033[0m Simbolo erroneo: '%s' en linea: %d\n", yytext, num_lineas);
