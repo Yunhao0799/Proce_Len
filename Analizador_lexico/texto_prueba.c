@@ -19,4 +19,7 @@ main(){
 		var1 = var1 * 2;
 		
 	var1 = elevarCuadrado(entero var1);
+	
+	lista de bool lista1;
+	lista de real lista2 = [2.3,5.1];
 }

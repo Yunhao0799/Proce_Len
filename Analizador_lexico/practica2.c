@@ -29,6 +29,7 @@ OPE_UNI_BIN ("no"|"!"|"-")
 {COMENTARIO_UNA_LINEA}      num_lineas++;
 \n                          num_lineas++;
 "sube hasta"|"baja hasta"   printf("lexema = '%s', token = 'MODO_FOR'\n", yytext);          return MODO_FOR;
+"lista de"                  printf("lexema = '%s', token = 'DECL_LISTAS'\n", yytext);       return DECL_LISTAS;
 [ \t]                       ;
 "("                         printf("lexema = '%s', token = 'INI_PARENTESIS'\n", yytext);    return INI_PARENTESIS;
 ")"                         printf("lexema = '%s', token = 'FIN_PARENTESIS'\n", yytext);    return FIN_PARENTESIS;
@@ -44,11 +45,11 @@ OPE_UNI_BIN ("no"|"!"|"-")
 "para"                      printf("lexema = '%s', token = 'BUCLE_PARA'\n", yytext);        return BUCLE_PARA;
 "mientras"                  printf("lexema = '%s', token = 'BUCLE_MIENTRAS'\n", yytext);    return BUCLE_MIENTRAS;
 "entonces"                  printf("lexema = '%s', token = 'ENTONCES'\n", yytext);          return ENTONCES;
-"lista de"                  printf("lexema = '%s', token = 'DECL_LISTAS'\n", yytext);       return DECL_LISTAS;
 "return"                    printf("lexema = '%s', token = 'RETURN'\n", yytext);            return RETURN;
 "haz"						printf("lexema = '%s', token = 'FINFOR'\n", yytext);  	        return FINFOR;
 "constante"					printf("lexema = '%s', token = 'CONSTANTE'\n", yytext);         return CONSTANTE;
 "'"							printf("lexema = '%s', token = 'INICOMILLAS'\n", yytext);       return COMILLAS;
+"main"						printf("lexema = '%s', token = 'MAIN'\n", yytext);       		return COMILLAS;
 
 {OPE_ARITMETICA}            printf("lexema = '%s', token = 'OP_ARITMETICA'\n", yytext);     return OP_ARITMETICA;
 {OPE_LOGICO}                printf("lexema = '%s', token = 'OP_LOGICO'\n", yytext);         return OP_LOGICO;
