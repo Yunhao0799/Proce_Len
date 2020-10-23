@@ -42,5 +42,6 @@
 #define CONSTANTE      282
 #define COMILLAS       283
 #define FINFOR         284
+#define MAIN           285
 
 #endif
