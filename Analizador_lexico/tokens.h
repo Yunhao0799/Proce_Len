@@ -43,5 +43,7 @@
 #define COMILLAS       283
 #define FINFOR         284
 #define MAIN           285
+#define ENTRADA        286
+#define SALIDA         287
 
 #endif
