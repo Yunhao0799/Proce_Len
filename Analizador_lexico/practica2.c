@@ -41,7 +41,6 @@ OPE_UNI_BIN ("no"|"!"|"-")
 ";"                         printf("lexema = '%s', token = 'PUNTOYCOMA'\n", yytext);        			 return PUNTOYCOMA;
 ","                         printf("lexema = '%s', token = 'COMA'\n", yytext);        					 return COMA;
 ":"                         printf("lexema = '%s', token = 'DOSPUNTOS'\n", yytext);         			 return DOSPUNTOS;
-"="|":="                    printf("lexema = '%s', token = 'OP_ASIGNACION'\n", yytext);     			 return OP_ASIGNACION;
 "si"                        printf("lexema = '%s', token = 'BUCLE_SI'\n", yytext);          			 return BUCLE_SI;
 "sino"                      printf("lexema = '%s', token = 'SINO'\n", yytext);          			     return SINO;
 "entonces"                  printf("lexema = '%s', token = 'ENTONCES'\n", yytext);          		     return ENTONCES;
@@ -58,6 +57,7 @@ OPE_UNI_BIN ("no"|"!"|"-")
 {OPE_LOGICO}                printf("lexema = '%s', token = 'OP_LOGICO'\n", yytext);         			 return OP_LOGICO;
 {OPE_ARITMETICA}            printf("lexema = '%s', token = 'OP_ARITMETICA'\n", yytext);     			 return OP_ARITMETICA;
 {OPE_UNARIO}                printf("lexema = '%s', token = 'OP_UNARIO'\n", yytext);         			 return OP_UNARIO;
+"="|":="                    printf("lexema = '%s', token = 'OP_ASIGNACION'\n", yytext);     			 return OP_ASIGNACION;
 {TIPO_VARIABLE}             printf("lexema = '%s', token = 'TIPO_VAR'\n", yytext);          			 return TIPO_VAR;
 ({ENTERO}|{REAL})           printf("lexema = '%s', token = 'NUMERO'\n", yytext);            			 return NUMERO;
 {IDENTIFICADOR}             printf("lexema = '%s', token = 'ID'\n", yytext);                			 return ID;
