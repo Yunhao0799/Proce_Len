@@ -18,7 +18,7 @@ IDENTIFICADOR {LETRA}({DIGITO}|{LETRA})*
 OPE_ARITMETICA ("+"|"-"|"*"|"/"|"%"|"@"|"--")
 OPE_LOGICO ("&&"|"||"|"y"|"o"|"xor")
 OPE_UNARIO ("++"|"--"|"#"|"?"|"**"|"<<"|">>"|"$")
-COMENTARIO_UNA_LINEA "//".*"\n"
+COMENTARIO_UNA_LINEA ("//".*"\n")
 TIPO_VARIABLE ("bool"|"caracter"|"real"|"entero")
 OPE_UNI_BIN ("no"|"!"|"-")
 
@@ -49,8 +49,8 @@ OPE_UNI_BIN ("no"|"!"|"-")
 "return"                    printf("lexema = '%s', token = 'RETURN'\n", yytext);            			 return RETURN;
 "haz"						printf("lexema = '%s', token = 'FINFOR'\n", yytext);  	        			 return FINFOR;
 "constante"					printf("lexema = '%s', token = 'CONSTANTE'\n", yytext);         			 return CONSTANTE;
-"'"							printf("lexema = '%s', token = 'INICOMILLAS'\n", yytext);       			 return COMILLAS;
-"main"						printf("lexema = '%s', token = 'MAIN'\n", yytext);       					 return COMILLAS;
+"'"							printf("lexema = '%s', token = 'COMILLAS'\n", yytext);		       			 return COMILLAS;
+"main"						printf("lexema = '%s', token = 'MAIN'\n", yytext);       					 return MAIN;
 
 {OPE_ARITMETICA}            printf("lexema = '%s', token = 'OP_ARITMETICA'\n", yytext);     			 return OP_ARITMETICA;
 {OPE_LOGICO}                printf("lexema = '%s', token = 'OP_LOGICO'\n", yytext);         			 return OP_LOGICO;
