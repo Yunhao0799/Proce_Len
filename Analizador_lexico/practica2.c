@@ -55,8 +55,8 @@ OPE_UNI_BIN ("no"|"!"|"-")
 "escribir"				    printf("lexema = '%s', token = 'SALIDA'\n", yytext);       				     return SALIDA;
 
 {OPE_LOGICO}                printf("lexema = '%s', token = 'OP_LOGICO'\n", yytext);         			 return OP_LOGICO;
-{OPE_ARITMETICA}            printf("lexema = '%s', token = 'OP_ARITMETICA'\n", yytext);     			 return OP_ARITMETICA;
 {OPE_UNARIO}                printf("lexema = '%s', token = 'OP_UNARIO'\n", yytext);         			 return OP_UNARIO;
+{OPE_ARITMETICA}            printf("lexema = '%s', token = 'OP_ARITMETICA'\n", yytext);     			 return OP_ARITMETICA;
 "="|":="                    printf("lexema = '%s', token = 'OP_ASIGNACION'\n", yytext);     			 return OP_ASIGNACION;
 {TIPO_VARIABLE}             printf("lexema = '%s', token = 'TIPO_VAR'\n", yytext);          			 return TIPO_VAR;
 ({ENTERO}|{REAL})           printf("lexema = '%s', token = 'NUMERO'\n", yytext);            			 return NUMERO;
