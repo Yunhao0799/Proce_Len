@@ -15,8 +15,11 @@ main(){
 		
 	si bit == 0 entonces
 		var1 = 2;
-	sino
+	sino{
 		var1 = var1 * 2;
+		numero ++;
+	}
+		
 		
 	var1 = elevarCuadrado(entero var1);
 	
