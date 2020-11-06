@@ -1,13 +1,13 @@
 //Un programa C para probar el analizador
 
-main(){
+principal(){
 	entero var1 = 2;
 	real numero;
 	bool bit = 0, bit2;
 	
 	elevarCuadrado(entero numero){
 		numero = numero * numero;
-		return numero;
+		retorno numero;
 	}
 
 	para contador := 0 sube hasta 1 haz 
@@ -23,6 +23,10 @@ main(){
 		
 	var1 = elevarCuadrado(entero var1);
 	
-	lista de bool lista1;
+	real lectura;
+	leer(lectura);
+	
+	lista de bool lista1 = [lectura];
 	lista de real lista2 = [2.3,5.1];
+	
 }
