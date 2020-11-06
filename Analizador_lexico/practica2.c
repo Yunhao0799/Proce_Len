@@ -8,6 +8,8 @@ int num_lineas = 1;
 
 %}
 
+%option noyywrap
+
 /* --- Inicio declaraciones Flex --- */
 
 LETRA[a-zA-Z]
