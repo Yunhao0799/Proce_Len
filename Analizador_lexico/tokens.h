@@ -37,13 +37,12 @@
 #define ID             277
 #define COMA           278
 #define DOSPUNTOS      279
-#define RETORNO        280
-#define MODO_FOR       281
-#define CONSTANTE      282
-#define COMILLAS       283
-#define FINPARA         284
-#define PRINCIPAL      285
-#define ENTRADA        286
-#define SALIDA         287
+#define MODO_FOR       280
+#define CONSTANTE      281
+#define COMILLAS       282
+#define FINPARA        283
+#define PRINCIPAL      284
+#define ENTRADA        285
+#define SALIDA         286
 
 #endif

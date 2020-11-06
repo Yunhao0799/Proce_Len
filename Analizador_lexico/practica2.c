@@ -46,7 +46,6 @@ OPE_UNI_BIN ("no"|"!"|"-")
 "entonces"                  printf("lexema = '%s', token = 'ENTONCES'\n", yytext);          		     return ENTONCES;
 "para"                      printf("lexema = '%s', token = 'BUCLE_PARA'\n", yytext);        			 return BUCLE_PARA;
 "mientras"                  printf("lexema = '%s', token = 'BUCLE_MIENTRAS'\n", yytext);     			 return BUCLE_MIENTRAS;
-"retorno"                   printf("lexema = '%s', token = 'RETORNO'\n", yytext);            			 return RETORNO;
 "haz"						printf("lexema = '%s', token = 'FINPARA'\n", yytext);  	        			 return FINPARA;
 "constante"					printf("lexema = '%s', token = 'CONSTANTE'\n", yytext);         			 return CONSTANTE;
 "'"							printf("lexema = '%s', token = 'COMILLAS'\n", yytext);		       			 return COMILLAS;

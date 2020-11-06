@@ -6,8 +6,7 @@ principal(){
 	bool bit = 0, bit2;
 	
 	elevarCuadrado(entero numero){
-		numero = numero * numero;
-		retorno numero;
+		numero = numero * (numero / 2);
 	}
 
 	para contador := 0 sube hasta 1 haz 
