@@ -9,8 +9,8 @@ endif
 
 programa: limpiar lex compilar
 
-lex: ./practica2.c
-	flex practica2.c
+lex: ./practica2.l
+	flex practica2.l
 
 compilar: ./lex.yy.c
 	gcc -o $(OS_FLAG) analizador lex.yy.c
