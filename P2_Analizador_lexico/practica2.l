@@ -17,12 +17,7 @@ DIGITO[0-9]
 ENTERO {DIGITO}+
 REAL {ENTERO}.{ENTERO}
 IDENTIFICADOR {LETRA}({DIGITO}|{LETRA})*
-OPE_ARITMETICA ("+"|"-"|"*"|"/"|"%"|"@"|"--")
-OPE_LOGICO ("&&"|"||"|"y"|"o"|"xor"|"==")
-OPE_UNARIO ("++"|"--"|"#"|"?"|"**"|"<<"|">>"|"$")
 COMENTARIO_UNA_LINEA ("//".*"\n")
-TIPO_VARIABLE ("bool"|"caracter"|"real"|"entero")
-OPE_UNI_BIN ("no"|"!"|"-")
 
 /* --- Fin declaraciones Flex ---*/
 
@@ -32,6 +27,34 @@ OPE_UNI_BIN ("no"|"!"|"-")
 \n                          num_lineas++;
 "sube hasta"   				printf("lexema = '%s', token = 'MODO_FOR' Atributo = 0\n", yytext);          return MODO_FOR;
 "baja hasta"   				printf("lexema = '%s', token = 'MODO_FOR' Atributo = 1\n", yytext);          return MODO_FOR;
+"bool"						printf("lexema = '%s', token = 'TIPO_VAR' Atributo = 0\n", yytext);			 return TIPO_VAR;
+"caracter"					printf("lexema = '%s', token = 'TIPO_VAR' Atributo = 1\n", yytext);			 return TIPO_VAR;
+"real"						printf("lexema = '%s', token = 'TIPO_VAR' Atributo = 2\n", yytext);			 return TIPO_VAR;
+"entero"					printf("lexema = '%s', token = 'TIPO_VAR' Atributo = 3\n", yytext);			 return TIPO_VAR;
+"&&"						printf("lexema = '%s', token = 'OP_LOGICO' Atributo = 0\n", yytext);		 return OP_LOGICO;
+"||"						printf("lexema = '%s', token = 'OP_LOGICO' Atributo = 1\n", yytext);		 return OP_LOGICO;
+"y"							printf("lexema = '%s', token = 'OP_LOGICO' Atributo = 2\n", yytext);		 return OP_LOGICO;
+"o"							printf("lexema = '%s', token = 'OP_LOGICO' Atributo = 3\n", yytext);		 return OP_LOGICO;
+"xor"						printf("lexema = '%s', token = 'OP_LOGICO' Atributo = 4\n", yytext);		 return OP_LOGICO;
+"=="						printf("lexema = '%s', token = 'OP_LOGICO' Atributo = 5\n", yytext);		 return OP_LOGICO;
+"no"						printf("lexema = '%s', token = 'OP_UNI_BIN' Atributo = 0\n", yytext);		 return OP_UNI_BIN;
+"!"							printf("lexema = '%s', token = 'OP_UNI_BIN' Atributo = 1\n", yytext);		 return OP_UNI_BIN;
+"-"							printf("lexema = '%s', token = 'OP_UNI_BIN' Atributo = 2\n", yytext);		 return OP_UNI_BIN;
+"+"							printf("lexema = '%s', token = 'OP_ARITMETICA' Atributo = 0\n", yytext); 	 return OP_ARITMETICA;
+"-"							printf("lexema = '%s', token = 'OP_ARITMETICA' Atributo = 1\n", yytext); 	 return OP_ARITMETICA;
+"*"							printf("lexema = '%s', token = 'OP_ARITMETICA' Atributo = 2\n", yytext); 	 return OP_ARITMETICA;
+"/"							printf("lexema = '%s', token = 'OP_ARITMETICA' Atributo = 3\n", yytext); 	 return OP_ARITMETICA;
+"%"							printf("lexema = '%s', token = 'OP_ARITMETICA' Atributo = 4\n", yytext); 	 return OP_ARITMETICA;
+"@"							printf("lexema = '%s', token = 'OP_ARITMETICA' Atributo = 5\n", yytext); 	 return OP_ARITMETICA;
+"--"						printf("lexema = '%s', token = 'OP_ARITMETICA' Atributo = 6\n", yytext); 	 return OP_ARITMETICA;
+"++"						printf("lexema = '%s', token = 'OP_UNARIO' Atributo = 0\n", yytext);         return OP_UNARIO;
+"--"						printf("lexema = '%s', token = 'OP_UNARIO' Atributo = 1\n", yytext);         return OP_UNARIO;
+"#"							printf("lexema = '%s', token = 'OP_UNARIO' Atributo = 2\n", yytext);         return OP_UNARIO;
+"?"							printf("lexema = '%s', token = 'OP_UNARIO' Atributo = 3\n", yytext);         return OP_UNARIO;
+"**"						printf("lexema = '%s', token = 'OP_UNARIO' Atributo = 4\n", yytext);         return OP_UNARIO;
+"<<"						printf("lexema = '%s', token = 'OP_UNARIO' Atributo = 5\n", yytext);         return OP_UNARIO;
+">>"						printf("lexema = '%s', token = 'OP_UNARIO' Atributo = 6\n", yytext);         return OP_UNARIO;
+"$"							printf("lexema = '%s', token = 'OP_UNARIO' Atributo = 7\n", yytext);         return OP_UNARIO;
 "lista de"                  printf("lexema = '%s', token = 'DECL_LISTAS'\n", yytext);       			 return DECL_LISTAS;
 [ \t]                       ;
 "("                         printf("lexema = '%s', token = 'INI_PARENTESIS'\n", yytext);    			 return INI_PARENTESIS;
@@ -56,11 +79,7 @@ OPE_UNI_BIN ("no"|"!"|"-")
 "leer"						printf("lexema = '%s', token = 'ENTRADA'\n", yytext);       				 return ENTRADA;
 "escribir"				    printf("lexema = '%s', token = 'SALIDA'\n", yytext);       				     return SALIDA;
 
-{OPE_LOGICO}                printf("lexema = '%s', token = 'OP_LOGICO'\n", yytext);         			 return OP_LOGICO;
-{OPE_UNARIO}                printf("lexema = '%s', token = 'OP_UNARIO'\n", yytext);         			 return OP_UNARIO;
-{OPE_ARITMETICA}            printf("lexema = '%s', token = 'OP_ARITMETICA'\n", yytext);     			 return OP_ARITMETICA;
 "="|":="                    printf("lexema = '%s', token = 'OP_ASIGNACION'\n", yytext);     			 return OP_ASIGNACION;
-{TIPO_VARIABLE}             printf("lexema = '%s', token = 'TIPO_VAR'\n", yytext);          			 return TIPO_VAR;
 ({ENTERO}|{REAL})           printf("lexema = '%s', token = 'NUMERO'\n", yytext);            			 return NUMERO;
 {IDENTIFICADOR}             printf("lexema = '%s', token = 'ID'\n", yytext);                			 return ID;
 
