@@ -13,7 +13,7 @@
 #ifndef __TOKENS_H
 #define __TOKENS_H
 
-#define CARACTERES     256
+#define ID     		   256
 #define NUMERO         257
 #define INI_BLOQUE     258
 #define FIN_BLOQUE     259
@@ -34,16 +34,15 @@
 #define DECL_LISTAS    274
 #define OP_UNI_BIN     275
 #define TIPO_VAR       276
-#define ID             277
-#define COMA           278
-#define DOSPUNTOS      279
-#define RETORNO        280
-#define MODO_FOR       281
-#define CONSTANTE      282
-#define COMILLAS       283
-#define FINPARA        284
-#define PRINCIPAL      285
-#define ENTRADA        286
-#define SALIDA         287
+#define COMA           277
+#define DOSPUNTOS      278
+#define MODO_FOR       279
+#define CONSTANTE      280
+#define COMILLAS       281
+#define FINPARA        282
+#define PRINCIPAL      283
+#define ENTRADA        284
+#define SALIDA         285
+#define NEGACION       286
 
 #endif
