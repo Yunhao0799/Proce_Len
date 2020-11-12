@@ -44,5 +44,6 @@
 #define ENTRADA        284
 #define SALIDA         285
 #define NEGACION       286
+#define SENTENCIA_LIST 287
 
 #endif
