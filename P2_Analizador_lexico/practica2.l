@@ -25,6 +25,7 @@ COMENTARIO_UNA_LINEA ("//".*"\n")
 %%
 {COMENTARIO_UNA_LINEA}      num_lineas++;
 \n                          num_lineas++;
+\r							;
 "sube hasta"   				printf("lexema = '%s', token = 'MODO_FOR' Atributo = 0\n", yytext);          	return MODO_FOR;
 "baja hasta"   				printf("lexema = '%s', token = 'MODO_FOR' Atributo = 1\n", yytext);          	return MODO_FOR;
 "bool"					printf("lexema = '%s', token = 'TIPO_VAR' Atributo = 0\n", yytext);		return TIPO_VAR;
