@@ -1,20 +1,13 @@
-FLAGS = -lfl
-OS_FLAG :=
-ifneq ($(OS),Windows_NT)
-	UNAME_S := $(shell uname -s)
-	ifneq ($(UNAME_S),Darwin)
-		OSFLAG += -lfl
-	endif
-endif
+programa: limpiar yacc lex compilar
 
-programa: limpiar lex compilar
+yacc: ./practica3.y
+	byacc -d practica3.y 
 
-lex: ./practica2.l
+lex: ./practica2.l ./y.tab.h
 	flex practica2.l
 
-compilar: ./lex.yy.c
-	gcc -o $(OS_FLAG) analizador lex.yy.c
-
+compilar: ./lex.yy.c ./y.tab.c
+	gcc -o analizador -lfl y.tab.c
 
 limpiar:
-	rm -f lex.yy.c analizador
+	rm -f  y.tab.c y.tab.h lex.yy.c analizador

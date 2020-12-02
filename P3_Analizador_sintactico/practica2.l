@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "tokens.h"
+#include "y.tab.h"
 
 int num_lineas = 1;
 
@@ -17,12 +17,7 @@ DIGITO[0-9]
 ENTERO {DIGITO}+
 REAL {ENTERO}.{ENTERO}
 IDENTIFICADOR {LETRA}({DIGITO}|{LETRA})*
-OPE_ARITMETICA ("+"|"-"|"*"|"/"|"%"|"@"|"--")
-OPE_LOGICO ("&&"|"||"|"y"|"o"|"xor"|"==")
-OPE_UNARIO ("++"|"--"|"#"|"?"|"**"|"<<"|">>"|"$")
 COMENTARIO_UNA_LINEA ("//".*"\n")
-TIPO_VARIABLE ("bool"|"caracter"|"real"|"entero")
-OPE_UNI_BIN ("no"|"!"|"-")
 
 /* --- Fin declaraciones Flex ---*/
 
@@ -30,69 +25,65 @@ OPE_UNI_BIN ("no"|"!"|"-")
 %%
 {COMENTARIO_UNA_LINEA}      num_lineas++;
 \n                          num_lineas++;
-"sube hasta"   				printf("lexema = '%s', token = 'MODO_FOR' Atributo = 0\n", yytext);          return MODO_FOR;
-"baja hasta"   				printf("lexema = '%s', token = 'MODO_FOR' Atributo = 1\n", yytext);          return MODO_FOR;
-"lista de"                  printf("lexema = '%s', token = 'DECL_LISTAS'\n", yytext);       			 return DECL_LISTAS;
-[ \t]                       ;
-"("                         printf("lexema = '%s', token = 'INI_PARENTESIS'\n", yytext);    			 return INI_PARENTESIS;
-")"                         printf("lexema = '%s', token = 'FIN_PARENTESIS'\n", yytext);    			 return FIN_PARENTESIS;
-"{"                         printf("lexema = '%s', token = 'INI_BLOQUE'\n", yytext);        			 return INI_BLOQUE;
-"}"                         printf("lexema = '%s', token = 'FIN_BLOQUE'\n", yytext);        			 return FIN_BLOQUE;
-"["                         printf("lexema = '%s', token = 'INI_AGREGADO'\n", yytext);      			 return INI_AGREGADO;
-"]"                         printf("lexema = '%s', token = 'FIN_AGREGADO'\n", yytext);      			 return FIN_AGREGADO;
-";"                         printf("lexema = '%s', token = 'PUNTOYCOMA'\n", yytext);        			 return PUNTOYCOMA;
-","                         printf("lexema = '%s', token = 'COMA'\n", yytext);        					 return COMA;
-":"                         printf("lexema = '%s', token = 'DOSPUNTOS'\n", yytext);         			 return DOSPUNTOS;
-"si"                        printf("lexema = '%s', token = 'BUCLE_SI'\n", yytext);          			 return BUCLE_SI;
-"sino"                      printf("lexema = '%s', token = 'SINO'\n", yytext);          			     return SINO;
-"entonces"                  printf("lexema = '%s', token = 'ENTONCES'\n", yytext);          		     return ENTONCES;
-"para"                      printf("lexema = '%s', token = 'BUCLE_PARA'\n", yytext);        			 return BUCLE_PARA;
-"mientras"                  printf("lexema = '%s', token = 'BUCLE_MIENTRAS'\n", yytext);     			 return BUCLE_MIENTRAS;
-"haz"						printf("lexema = '%s', token = 'FINPARA'\n", yytext);  	        			 return FINPARA;
-"constante"					printf("lexema = '%s', token = 'CONSTANTE'\n", yytext);         			 return CONSTANTE;
-"'"							printf("lexema = '%s', token = 'COMILLAS'\n", yytext);		       			 return COMILLAS;
-"principal"					printf("lexema = '%s', token = 'PRINCIPAL'\n", yytext);       				 return PRINCIPAL;
-"leer"						printf("lexema = '%s', token = 'ENTRADA'\n", yytext);       				 return ENTRADA;
-"escribir"				    printf("lexema = '%s', token = 'SALIDA'\n", yytext);       				     return SALIDA;
+\r							;
+"sube hasta"   				return MODO_FOR;
+"baja hasta"   				return MODO_FOR;
+"bool"					return TIPO_VAR;
+"caracter"				return TIPO_VAR;
+"real"					return TIPO_VAR;
+"entero"				return TIPO_VAR;
+"&&"					return OP_LOGICO;
+"||"					return OP_LOGICO;
+"y"					return OP_LOGICO;
+"o"					return OP_LOGICO;
+"xor"					return OP_LOGICO;
+"=="					return OP_LOGICO;
+"!="					return OP_LOGICO;
+"no"					return NEGACION;
+"!"					return NEGACION;
+"--"					return OP_UNI_BIN;
+"-"					return OP_UNI_BIN;
+"++"					return OP_UNARIO;
+"+"					return OP_ARITMETICA;
+"**"					return OP_ARITMETICA;
+"*"					return OP_ARITMETICA;
+"/"					return OP_ARITMETICA;
+"%"					return OP_ARITMETICA;
+"@"					return OP_ARITMETICA;
+"#"					return OP_UNARIO;
+"?"					return OP_UNARIO;
+"<<"					return SENTENCIA_LIST;
+">>"					return SENTENCIA_LIST;
+"$"					return SENTENCIA_LIST;
+"lista de"                  		return DECL_LISTAS;
+[ \t]                       		;
+"("                         		return INI_PARENTESIS;
+")"                         		return FIN_PARENTESIS;
+"{"                         		return INI_BLOQUE;
+"}"                         		return FIN_BLOQUE;
+"["                         		return INI_AGREGADO;
+"]"                         		return FIN_AGREGADO;
+";"                         		return PUNTOYCOMA;
+","                         		return COMA;
+":"                         		return DOSPUNTOS;
+"sino"                      		return SINO;
+"si"                        		return BUCLE_SI;
+"entonces"                  		return ENTONCES;
+"para"                      		return BUCLE_PARA;
+"mientras"                  		return BUCLE_MIENTRAS;
+"haz"					return FINPARA;
+"constante"				return CONSTANTE;
+"'"					return COMILLAS;
+"principal"				return PRINCIPAL;
+"leer"					return ENTRADA;
+"escribir"				return SALIDA;
 
-{OPE_LOGICO}                printf("lexema = '%s', token = 'OP_LOGICO'\n", yytext);         			 return OP_LOGICO;
-{OPE_UNARIO}                printf("lexema = '%s', token = 'OP_UNARIO'\n", yytext);         			 return OP_UNARIO;
-{OPE_ARITMETICA}            printf("lexema = '%s', token = 'OP_ARITMETICA'\n", yytext);     			 return OP_ARITMETICA;
-"="|":="                    printf("lexema = '%s', token = 'OP_ASIGNACION'\n", yytext);     			 return OP_ASIGNACION;
-{TIPO_VARIABLE}             printf("lexema = '%s', token = 'TIPO_VAR'\n", yytext);          			 return TIPO_VAR;
-({ENTERO}|{REAL})           printf("lexema = '%s', token = 'NUMERO'\n", yytext);            			 return NUMERO;
-{IDENTIFICADOR}             printf("lexema = '%s', token = 'ID'\n", yytext);                			 return ID;
+"="|":="                    		return OP_ASIGNACION;
+{REAL}					return NUMERO;
+{ENTERO}           			return NUMERO;
+{IDENTIFICADOR}             		return ID;
 
 
-.                           printf("\033[1;31mError:  \033[0m Simbolo erroneo: '%s' en linea: %d\n", yytext, num_lineas);
+.                           		printf("\033[1;31mError:  \033[0m Simbolo erroneo: '%s' en linea: %d\n", yytext, num_lineas);
 
 %%
-
-int main (int argc, char** argv) {
-
-    // Esta parte se encarga de leer el fichero de entrada, token por token 
-
-	if (argc <= 1) {
-        printf("\nError: falta archivo a leer\n");
-		exit(-1);
-	}
-
-    yyin = fopen(argv[1], "r");
-
-    if (yyin == NULL) {
-
-        printf ("\nError abriendo el archivo %s\n", argv[1]);
-
-        exit (-1);
-
-    }
-
-	int siguiente_token = yylex();
-
-	while (siguiente_token != 0) {
-		siguiente_token = yylex();
-	}
-
-	exit(1);
-
-}
