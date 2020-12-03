@@ -21,4 +21,4 @@ compilar: ./lex.yy.c ./y.tab.c
 	gcc -o analizador $(OS_FLAG) y.tab.c
 
 limpiar:
-	rm -f  y.tab.c y.tab.h lex.yy.c analizador
+	rm -f  y.tab.c y.tab.h lex.yy.c analizador y.output

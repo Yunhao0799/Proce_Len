@@ -7,7 +7,7 @@
 	void yyerror(const char *s);
 %}
 
-%error-verbose
+// %error-verbose
 
 /* Inicio definicion precedencia de operadores  */
 /* Cuanto mas abajo mas prioritario */
