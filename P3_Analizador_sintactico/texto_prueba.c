@@ -6,33 +6,14 @@ principal(){
 	bool bit = 0, bit2;
 	
 	elevarCuadrado(entero numero){
-		numero = numero * numero;
+		caracter jdoer;
 	}
 	
 	procedimiento(entero numero1, entero numero2){
-		numero1 = (numero1 * -numero2) % 5;
+		caracter joder;
 	}
-
-	para contador := 0 sube hasta 1 haz 
-		var1 = var1 + 1;
-		
-	si !(bit == 0) entonces
-		var1 = 2;
-	sino{
-		var1 = var1 * 2;
-		numero ++;
-	}
-		
-		
-	var1 = elevarCuadrado(entero var1);
 	
-	real lectura;
-	leer(lectura);
+	caracter var1 = elevarCuadrado(entero var1);
 	
-	lista de bool lista1 = [lectura];
-	lista de real lista2 = [2.3,5.1], lista3 = [1.0];
-	lista2 = lista2 ** lista3;
 	
-	$lista2;
-	lista2 >>;
 }
