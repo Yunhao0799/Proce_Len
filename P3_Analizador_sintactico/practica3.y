@@ -8,7 +8,11 @@
 /* Inicio definicion precedencia de operadores  */
 /* Cuanto mas abajo mas prioritario */
 
-
+%left OP_LOGICO
+%left OP_ARITMETICA
+%right NEGACION
+%left OP_UNARIO
+%left OP_UNI_BIN
 
 /* Fin definicion de precedencia de operadores*/
 
