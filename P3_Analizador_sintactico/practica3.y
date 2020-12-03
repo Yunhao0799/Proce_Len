@@ -3,7 +3,11 @@
 	#include <stdlib.h>
 	#include <string.h>
 
+	int yylex();
+	void yyerror(const char *s);
 %}
+
+%error-verbose
 
 /* Inicio definicion precedencia de operadores  */
 /* Cuanto mas abajo mas prioritario */
@@ -13,6 +17,7 @@
 %right NEGACION
 %left OP_UNARIO
 %left OP_UNI_BIN
+%nonassoc SINO
 
 /* Fin definicion de precedencia de operadores*/
 
@@ -30,7 +35,7 @@
 
 
 
-%START S
+%start S
 %%
 /* Inicio reglas gramaticales */
 S : CAB_PROGRAMA BLOQUE;
@@ -179,11 +184,15 @@ AGREGADOS : EXPRESION COMA AGREGADOS
 %%
 
 
-#include "error.y"
+// #include "error.y"
 #include "lex.yy.c"
 
 int main (int argc, char** argv) {
 
 	yyparse();
 
+}
+
+void yyerror(const char* s){
+    printf("\033[1;31mError\033[0m linea %d: %s\n", yylineno , s);
 }
