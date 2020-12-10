@@ -23,9 +23,9 @@ principal(){
 		numero ++;
 	}
 	
-	var1 = elevarCuadrado(var1);
+	elevarCuadrado();
 	
-	numero = (var1 + elevarCuadrado(var1))/10;
+	numero = (var1 + (var1 * 2))/10;
 	
 	real lectura;
 	
