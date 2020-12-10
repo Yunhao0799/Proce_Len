@@ -5,6 +5,50 @@
 
     int yylex();
     void yyerror(const char *s);
+
+/* Inicio definicion de la tabla de simbolos */
+
+typedef enum{
+	marca,
+	procedimiento,
+	variable,
+	parametro_formal
+} tipoEntrada;
+
+typedef enum{
+	entero,
+	real,
+	bool,
+	caracter,
+	lista,
+	desconocido,
+	no_asignado
+} dTipo;
+
+typedef struct{
+	tipoEntrada entrada;
+	char* nombre;
+	dTipo tipoDato;
+	unsigned int parametros;
+} entradaTS;
+
+#define MAX_TS 500
+
+unsigned int TOPE = 0;
+unsigned int Subprog;
+
+entradaTS TS[MAX_TS];
+
+typedef struct{
+	int atributo;
+	char* lexema;
+	dTipo tipo;
+} atributos;
+
+#define YYSTYPE atributos
+
+/* Fin definicion de la tabla de simbolos */
+
 %}
 
 /* Inicio definicion precedencia de operadores  */
