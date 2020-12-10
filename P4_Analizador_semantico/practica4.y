@@ -2,6 +2,7 @@
 
     #include <stdlib.h>
     #include <string.h>
+    #include <stdio.h>
 
     int yylex();
     void yyerror(const char *s);
@@ -20,7 +21,8 @@ typedef enum{
 	caracter,
 	real,
 	entero,
-	lista
+	lista,
+	desconocido
 } dTipo;
 
 typedef struct{
@@ -58,15 +60,50 @@ void insertarMarca(){
 void vaciarEntradas(){
 	do{
 		TOPE --;
-	}while(TS[TOPE].entrada != marca && TOPE > 0);
+	}while(TS[TOPE].entrada != marca);
+}
+
+void verificarDescononocidos(unsigned int atributo){
+	unsigned int aux = TOPE-1;
+	
+	while(TS[aux].tipoDato == desconocido){
+		TS[aux].tipoDato = atributo;
+		aux --;
+	}
+		
+	
 }
 
 void insertarIdentificador(char* id, unsigned int atributo){
+	verificarDescononocidos(atributo);
+
 	TS[TOPE].entrada = variable;
 	TS[TOPE].nombre = id;
 	TS[TOPE].tipoDato = atributo;
 	TOPE ++;
 }
+
+void insertarDescnonocido(char* id){
+	TS[TOPE].entrada = variable;
+	TS[TOPE].nombre = id;
+	TS[TOPE].tipoDato = desconocido;
+	TOPE ++;
+}
+
+void mostrarTabla(){
+
+	for(int i = 0; i  < TOPE; i ++){
+		if(TS[i].entrada == marca){
+			printf("%d\n", TS[i].entrada);
+		}else
+			printf("%d nombre = %s tipoDato = %d \n", TS[i].entrada,TS[i].nombre,TS[i].tipoDato);
+	}
+	printf("------------------------------------------------\n");
+}
+
+
+
+
 
 /* Fin definicion funciones */
 
@@ -112,9 +149,9 @@ CAB_PROGRAMA : PRINCIPAL INI_PARENTESIS FIN_PARENTESIS
              | PRINCIPAL INI_PARENTESIS error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
 
-BLOQUE : INI_BLOQUE {printf("Pone Marca.\n"); insertarMarca();}
+BLOQUE : INI_BLOQUE {insertarMarca(); mostrarTabla();}
 	OPCIONES 
-	FIN_BLOQUE {printf("Reduce marcas.\n"); vaciarEntradas();}
+	FIN_BLOQUE {vaciarEntradas();mostrarTabla();}
        | error OPCIONES FIN_BLOQUE {printf(", expected: 'INI_BLOQUE'\n"); yyerrok;}
        | INI_BLOQUE OPCIONES error {printf(", expected: 'FIN_BLOQUE'\n"); yyerrok;}
 ;
@@ -146,16 +183,16 @@ DECL_VAR_LOCALES : VAR_LOCAL
                  | CONSTANTE VAR_LOCAL
 ;
 
-VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA {printf("Añade variable.\n"); insertarIdentificador($3.lexema, $1.tipo);}
-          | TIPO_DATO ID PUNTOYCOMA {printf("Añade variable.\n"); insertarIdentificador($2.lexema, $1.tipo);}
-          | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA {printf("Añade variable.\n"); insertarIdentificador($3.lexema, $1.tipo);}
-          | TIPO_DATO ASIGNACION PUNTOYCOMA {printf("Añade variable.\n"); insertarIdentificador($2.lexema, $1.tipo);}
+VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA {insertarIdentificador($3.lexema, $1.tipo);mostrarTabla();}
+          | TIPO_DATO ID PUNTOYCOMA {insertarIdentificador($2.lexema, $1.tipo);mostrarTabla();}
+          | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA {insertarIdentificador($3.lexema, $1.tipo);mostrarTabla();}
+          | TIPO_DATO ASIGNACION PUNTOYCOMA {insertarIdentificador($2.lexema, $1.tipo);mostrarTabla();}
 ;
 
-DECL_MULTIPLE : DECL_MULTIPLE ID COMA
-              | DECL_MULTIPLE ASIGNACION COMA
-              | ID COMA
-              | ASIGNACION COMA
+DECL_MULTIPLE : DECL_MULTIPLE ID COMA {insertarDescnonocido($2.lexema); mostrarTabla();}
+              | DECL_MULTIPLE ASIGNACION COMA {insertarDescnonocido($2.lexema); mostrarTabla();}
+              | ID COMA {insertarDescnonocido($1.lexema); mostrarTabla();}
+              | ASIGNACION COMA {insertarDescnonocido($1.lexema); mostrarTabla();}
 ;
 
 SENTENCIAS : BUCLE_FOR
@@ -313,5 +350,5 @@ int main (int argc, char** argv) {
 }
 
 void yyerror(const char* s){
-    printf("\033[1;31m%s\033[0m en linea %d:  %s\n", s, yylineno , yytext);
+    printf("\033[1;31m%s\033[0m en linea %d:  %s", s, yylineno , yytext);
 }

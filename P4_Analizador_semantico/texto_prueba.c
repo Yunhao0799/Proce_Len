@@ -10,6 +10,8 @@ principal(){
 	}
 	
 	procedimiento(entero numero1, entero numero2){
+		real nada;
+		entero otro;
 		numero1 = (numero1 * -numero2) % 5;
 	}
 
