@@ -11,7 +11,7 @@ principal(){
 	
 	procedimiento(entero numero1, entero numero2){
 		real nada;
-		entero otro;
+		entero otro, var2;
 		numero1 = (numero1 * -numero2) % 5;
 	}
 

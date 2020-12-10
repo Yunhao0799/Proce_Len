@@ -26,44 +26,44 @@ COMENTARIO_UNA_LINEA ("//".*"\n")
 {COMENTARIO_UNA_LINEA}      		num_lineas++;
 \n                          		num_lineas++;
 \r					;
-"sube hasta"   				{yyval.tipo = 0; return MODO_FOR;}
-"baja hasta"   				{yyval.tipo = 1; return MODO_FOR;}
+"sube hasta"   				{yylval.tipo = 0; return MODO_FOR;}
+"baja hasta"   				{yylval.tipo = 1; return MODO_FOR;}
 
-"bool"					{yyval.tipo = 0; return TIPO_VAR;}
-"caracter"				{yyval.tipo = 1; return TIPO_VAR;}
-"real"					{yyval.tipo = 2; return TIPO_VAR;}
-"entero"				{yyval.tipo = 3; return TIPO_VAR;}
+"bool"					{yylval.tipo = 0; return TIPO_VAR;}
+"caracter"				{yylval.tipo = 1; return TIPO_VAR;}
+"real"					{yylval.tipo = 2; return TIPO_VAR;}
+"entero"				{yylval.tipo = 3; return TIPO_VAR;}
 
-"&&"					{yyval.tipo = 0; return OP_AND_LOGICO;}
-"y"					{yyval.tipo = 1; return OP_AND_LOGICO;}
+"&&"					{yylval.tipo = 0; return OP_AND_LOGICO;}
+"y"					{yylval.tipo = 1; return OP_AND_LOGICO;}
 
-"||"					{yyval.tipo = 0; return OP_OR_LOGICO;}
-"o"					{yyval.tipo = 1; return OP_OR_LOGICO;}
+"||"					{yylval.tipo = 0; return OP_OR_LOGICO;}
+"o"					{yylval.tipo = 1; return OP_OR_LOGICO;}
 
 "xor"					return OP_EXOR_LOGICO;
 
-"=="					{yyval.tipo = 0; return OP_IGUALDAD_LOGICO;}
-"!="				    	{yyval.tipo = 1; return OP_IGUALDAD_LOGICO;}
+"=="					{yylval.tipo = 0; return OP_IGUALDAD_LOGICO;}
+"!="				    	{yylval.tipo = 1; return OP_IGUALDAD_LOGICO;}
 
-"no"				    	{yyval.tipo = 0; return NEGACION;}
-"!"			    	    	{yyval.tipo = 1; return NEGACION;}
+"no"				    	{yylval.tipo = 0; return NEGACION;}
+"!"			    	    	{yylval.tipo = 1; return NEGACION;}
 
 "--"			    		return OP_DECREMENTO;
 "-"				        return OP_ADD_MI_ARITMETICA;
 "++"					return OP_INCREMENTO;
 "+"			    	    	return OP_ADD_PL_ARITMETICA;
-"**"			    		{yyval.tipo = 0; return OP_LIST_ARITMETICA;}
-"*"			        	{yyval.tipo = 0; return OP_MULT_ARITMETICA;}
+"**"			    		{yylval.tipo = 0; return OP_LIST_ARITMETICA;}
+"*"			        	{yylval.tipo = 0; return OP_MULT_ARITMETICA;}
 
 "/"				        {yyval.tipo = 1; return OP_MULT_ARITMETICA;}
-"%"		        		{yyval.tipo = 2; return OP_MULT_ARITMETICA;}
-"@"				        {yyval.tipo = 1; return OP_LIST_ARITMETICA;}
-"#"	        			{yyval.tipo = 0; return OP_LIST_UNARIO;}
-"?"			        	{yyval.tipo = 1; return OP_LIST_UNARIO;}
+"%"		        		{yylval.tipo = 2; return OP_MULT_ARITMETICA;}
+"@"				        {yylval.tipo = 1; return OP_LIST_ARITMETICA;}
+"#"	        			{yylval.tipo = 0; return OP_LIST_UNARIO;}
+"?"			        	{yylval.tipo = 1; return OP_LIST_UNARIO;}
 
-"<<"				       	{yyval.tipo = 0; return SENTENCIA_LIST;}
-">>"		    			{yyval.tipo = 1; return SENTENCIA_LIST;}
-"$"				        {yyval.tipo = 2; return SENTENCIA_LIST;}
+"<<"				       	{yylval.tipo = 0; return SENTENCIA_LIST;}
+">>"		    			{yylval.tipo = 1; return SENTENCIA_LIST;}
+"$"				        {yylval.tipo = 2; return SENTENCIA_LIST;}
 "lista de"             			return DECL_LISTAS;
 [ \t]                  			;
 "("                    			return INI_PARENTESIS;

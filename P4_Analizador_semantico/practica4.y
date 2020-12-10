@@ -73,7 +73,24 @@ void verificarDescononocidos(unsigned int atributo){
 	
 }
 
+void comprobarDeclarados(char* nuevo){
+	unsigned int aux = TOPE-1;
+
+	while(TS[aux].entrada != marca){
+		if(strcmp(TS[aux].nombre,nuevo) == 0){
+			printf("La variable de nombre '%s' ya esta definida.\n",nuevo);
+			exit(-1);
+		}
+		aux --;
+	}
+
+	printf("comprobarDeclarados ejecutado \n");
+	
+}
+
 void insertarIdentificador(char* id, unsigned int atributo){
+	comprobarDeclarados(id);
+	
 	verificarDescononocidos(atributo);
 
 	TS[TOPE].entrada = variable;
@@ -82,9 +99,11 @@ void insertarIdentificador(char* id, unsigned int atributo){
 	TOPE ++;
 }
 
-void insertarDescnonocido(char* id){
+void insertarDesconocido(char* id){
+	comprobarDeclarados(id);
+		
 	TS[TOPE].entrada = variable;
-    strcpy(TS[TOPE].nombre, id);
+        strcpy(TS[TOPE].nombre, id);
 	TS[TOPE].tipoDato = desconocido;
 	TOPE ++;
 }
@@ -151,8 +170,6 @@ CAB_PROGRAMA : PRINCIPAL INI_PARENTESIS FIN_PARENTESIS
 BLOQUE : INI_BLOQUE {insertarMarca(); mostrarTabla();}
 	OPCIONES 
 	FIN_BLOQUE {vaciarEntradas();mostrarTabla();}
-       | error OPCIONES FIN_BLOQUE {printf(", expected: 'INI_BLOQUE'\n"); yyerrok;}
-       | INI_BLOQUE OPCIONES error {printf(", expected: 'FIN_BLOQUE'\n"); yyerrok;}
 ;
 
 
@@ -175,7 +192,6 @@ CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS
 
 PARAMETRO : PARAMETRO COMA TIPO_DATO ID
           | TIPO_DATO ID
-//          |
 ;
 
 DECL_VAR_LOCALES : VAR_LOCAL
@@ -188,10 +204,10 @@ VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA {insertarIdentificador($3.lexe
           | TIPO_DATO ASIGNACION PUNTOYCOMA {insertarIdentificador($2.lexema, $1.tipo);mostrarTabla();}
 ;
 
-DECL_MULTIPLE : DECL_MULTIPLE ID COMA {insertarDescnonocido($2.lexema); mostrarTabla();}
-              | DECL_MULTIPLE ASIGNACION COMA {insertarDescnonocido($2.lexema); mostrarTabla();}
-              | ID COMA {insertarDescnonocido($1.lexema); mostrarTabla();}
-              | ASIGNACION COMA {insertarDescnonocido($1.lexema); mostrarTabla();}
+DECL_MULTIPLE : DECL_MULTIPLE ID COMA {insertarDesconocido($2.lexema); mostrarTabla();}
+              | DECL_MULTIPLE ASIGNACION COMA {insertarDesconocido($2.lexema); mostrarTabla();}
+              | ID COMA {insertarDesconocido($1.lexema); mostrarTabla();}
+              | ASIGNACION COMA {insertarDesconocido($1.lexema); mostrarTabla();}
 ;
 
 SENTENCIAS : BUCLE_FOR
@@ -236,15 +252,6 @@ CADENA : CADENA ID
 
 BUCLE_FOR : BUCLE_PARA ID OP_ASIGNACION NUMERO MODO_FOR NUMERO FINPARA CANTIDAD_CODIGO;
 
-//CONDICION : CONDICION OP_AND_LOGICO CONDICION 
-//          | CONDICION OP_OR_LOGICO CONDICION
-//          | CONDICION OP_EXOR_LOGICO CONDICION
-//          | CONDICION OP_IGUALDAD_LOGICO CONDICION
-//          | INI_PARENTESIS CONDICION FIN_PARENTESIS
-//          | NEGACION CONDICION
-//          | EXPRESION
-;
-
 SENTENCIA_SI : BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO SINO CANTIDAD_CODIGO
              | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO
 ;
@@ -262,10 +269,6 @@ TIPO_DATO : TIPO_BASICO {$$.tipo = $1.tipo;}
 TIPO_BASICO : TIPO_VAR; {$$.tipo = $1.tipo;}
 
 TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR; {$$.tipo = lista;}
-
-//OP_BINARIO : OP_ARITMETICA
-//           | OP_LOGICO
-//;
 
 ASIGNACION : ID OP_ASIGNACION EXPRESION {strcpy($$.lexema, $1.lexema);}
            | ID error EXPRESION {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
@@ -322,12 +325,6 @@ EST_AGREGADO : INI_AGREGADO AGREGADOS FIN_AGREGADO
 AGREGADOS : EXPRESION COMA AGREGADOS
           | EXPRESION
 ;
-
-//OP_LOGICO : OP_AND_LOGICO | OP_OR_LOGICO | OP_EXOR_LOGICO
-//          | OP_IGUALDAD_LOGICO 
-//;
-//OP_ARITMETICA : OP_ADD_PL_ARITMETICA | OP_MULT_ARITMETICA | OP_ADD_MI_ARITMETICA
-//;
 
 OP_UNARIO : OP_INCREMENTO | OP_LIST_UNARIO | OP_DECREMENTO
 ;
