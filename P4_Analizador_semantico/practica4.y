@@ -16,13 +16,11 @@ typedef enum{
 } tipoEntrada;
 
 typedef enum{
-	entero,
-	real,
 	bool,
 	caracter,
-	lista,
-	desconocido,
-	no_asignado
+	real,
+	entero,
+	lista
 } dTipo;
 
 typedef struct{
@@ -49,6 +47,29 @@ typedef struct{
 
 /* Fin definicion de la tabla de simbolos */
 
+
+/* Inicio definicion funciones */
+
+void insertarMarca(){
+	TS[TOPE].entrada = marca;
+	TOPE ++;
+}
+
+void vaciarEntradas(){
+	do{
+		TOPE --;
+	}while(TS[TOPE].entrada != marca && TOPE > 0);
+}
+
+void insertarIdentificador(char* id, unsigned int atributo){
+	TS[TOPE].entrada = variable;
+	TS[TOPE].nombre = id;
+	TS[TOPE].tipoDato = atributo;
+	TOPE ++;
+}
+
+/* Fin definicion funciones */
+
 %}
 
 /* Inicio definicion precedencia de operadores  */
@@ -70,7 +91,7 @@ typedef struct{
 
 /* Inicio definicion de tokens  */
 
-%token ID NUMERO INI_BLOQUE FIN_BLOQUE INI_AGREGADO FIN_AGREGADO PUNTOYCOMA 
+%token ID ENTERO REAL INI_BLOQUE FIN_BLOQUE INI_AGREGADO FIN_AGREGADO PUNTOYCOMA 
 %token OP_ASIGNACION BUCLE_SI BUCLE_MIENTRAS 
 %token BUCLE_PARA INI_PARENTESIS FIN_PARENTESIS ENTONCES DECL_LISTAS 
 %token TIPO_VAR COMA DOSPUNTOS MODO_FOR CONSTANTE COMILLAS FINPARA PRINCIPAL ENTRADA
@@ -86,10 +107,18 @@ typedef struct{
 /* Inicio reglas gramaticales */
 S : CAB_PROGRAMA BLOQUE;
 
-CAB_PROGRAMA : PRINCIPAL INI_PARENTESIS FIN_PARENTESIS;
-
-BLOQUE : INI_BLOQUE OPCIONES FIN_BLOQUE
+CAB_PROGRAMA : PRINCIPAL INI_PARENTESIS FIN_PARENTESIS
+             | PRINCIPAL error FIN_PARENTESIS {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
+             | PRINCIPAL INI_PARENTESIS error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
+
+BLOQUE : INI_BLOQUE {printf("Pone Marca.\n"); insertarMarca();}
+	OPCIONES 
+	FIN_BLOQUE {printf("Reduce marcas.\n"); vaciarEntradas();}
+       | error OPCIONES FIN_BLOQUE {printf(", expected: 'INI_BLOQUE'\n"); yyerrok;}
+       | INI_BLOQUE OPCIONES error {printf(", expected: 'FIN_BLOQUE'\n"); yyerrok;}
+;
+
 
 OPCIONES : OPCIONES DECL_VAR_LOCALES 
          | OPCIONES DECL_PROCEDIMIENTO
@@ -97,27 +126,30 @@ OPCIONES : OPCIONES DECL_VAR_LOCALES
          |
 ;
 
-//DECL_PROCEDIMIENTOS : DECL_PROCEDIMIENTOS DECL_PROCEDIMIENTO
-//                    | DECL_PROCEDIMIENTO
-//;
-
 DECL_PROCEDIMIENTO : CAB_PROCEDIMIENTO BLOQUE;
 
-CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS;
+
+CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS
+                  | ID INI_PARENTESIS FIN_PARENTESIS
+                  | ID error PARAMETRO FIN_PARENTESIS {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
+                  | ID error FIN_PARENTESIS {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
+                  | ID INI_PARENTESIS PARAMETRO error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
+                  | ID INI_PARENTESIS error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
+;
 
 PARAMETRO : PARAMETRO COMA TIPO_DATO ID
           | TIPO_DATO ID
-          |
+//          |
 ;
 
 DECL_VAR_LOCALES : VAR_LOCAL
                  | CONSTANTE VAR_LOCAL
 ;
 
-VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA
-          | TIPO_DATO ID PUNTOYCOMA
-          | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA
-          | TIPO_DATO ASIGNACION PUNTOYCOMA
+VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA {printf("Añade variable.\n"); insertarIdentificador($3.lexema, $1.tipo);}
+          | TIPO_DATO ID PUNTOYCOMA {printf("Añade variable.\n"); insertarIdentificador($2.lexema, $1.tipo);}
+          | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA {printf("Añade variable.\n"); insertarIdentificador($3.lexema, $1.tipo);}
+          | TIPO_DATO ASIGNACION PUNTOYCOMA {printf("Añade variable.\n"); insertarIdentificador($2.lexema, $1.tipo);}
 ;
 
 DECL_MULTIPLE : DECL_MULTIPLE ID COMA
@@ -137,9 +169,15 @@ SENTENCIAS : BUCLE_FOR
            | ID SENTENCIA_LIST PUNTOYCOMA
 ;
 
-SENTENCIA_ENTRADA : ENTRADA INI_PARENTESIS LISTA_VAR FIN_PARENTESIS ;
+SENTENCIA_ENTRADA : ENTRADA INI_PARENTESIS LISTA_VAR FIN_PARENTESIS 
+                  | ENTRADA error LISTA_VAR FIN_PARENTESIS {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
+                  | ENTRADA INI_PARENTESIS LISTA_VAR error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
+;
 
-SENTENCIA_SALIDA : SALIDA INI_PARENTESIS LIST_ESXP_O_CAD FIN_PARENTESIS ;
+SENTENCIA_SALIDA : SALIDA INI_PARENTESIS LIST_ESXP_O_CAD FIN_PARENTESIS 
+                 | SALIDA error LIST_ESXP_O_CAD FIN_PARENTESIS {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
+                 | SALIDA INI_PARENTESIS LIST_ESXP_O_CAD error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
+;
 
 LISTA_VAR : LISTA_VAR COMA ID
           | ID
@@ -174,33 +212,48 @@ SENTENCIA_SI : BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDA
              | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO
 ;
 
-BUCLE_WHILE : BUCLE_MIENTRAS INI_PARENTESIS EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO;
 
-TIPO_DATO : TIPO_BASICO
-          | TIPO_COMPLEJO
+BUCLE_WHILE : BUCLE_MIENTRAS INI_PARENTESIS EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO
+            | BUCLE_MIENTRAS error EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
+            | BUCLE_MIENTRAS INI_PARENTESIS EXPRESION error CANTIDAD_CODIGO {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
 
-TIPO_BASICO : TIPO_VAR;
+TIPO_DATO : TIPO_BASICO {$$.tipo = $1.tipo;}
+          | TIPO_COMPLEJO {$$.tipo = $1.tipo;}
+;
 
-TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR;
+TIPO_BASICO : TIPO_VAR; {$$.tipo = $1.tipo;}
+
+TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR; {$$.tipo = lista;}
 
 //OP_BINARIO : OP_ARITMETICA
 //           | OP_LOGICO
 //;
 
-ASIGNACION : ID OP_ASIGNACION EXPRESION
-           | ID OP_ASIGNACION ASIGNACION
-           | ID OP_ASIGNACION EST_AGREGADO
+ASIGNACION : ID OP_ASIGNACION EXPRESION {$$.lexema = $1.lexema;}
+           | ID error EXPRESION {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
+           | ID OP_ASIGNACION ASIGNACION {$$.lexema = $1.lexema;}
+           | ID error ASIGNACION {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
+           | ID OP_ASIGNACION EST_AGREGADO {$$.lexema = $1.lexema;}
+           | ID error EST_AGREGADO {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
 ;
 
 EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION
+          | EXPRESION OP_ADD_MI_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_ADD_PL_ARITMETICA EXPRESION
+          | EXPRESION OP_ADD_PL_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_MULT_ARITMETICA EXPRESION
+          | EXPRESION OP_MULT_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
 	      | EXPRESION OP_LIST_ARITMETICA EXPRESION
+          | EXPRESION OP_LIST_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_AND_LOGICO EXPRESION 
+          | EXPRESION OP_AND_LOGICO error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_OR_LOGICO EXPRESION
+          | EXPRESION OP_OR_LOGICO error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_EXOR_LOGICO EXPRESION
+          | EXPRESION OP_EXOR_LOGICO error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_IGUALDAD_LOGICO EXPRESION
+          | EXPRESION OP_IGUALDAD_LOGICO error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | NEGACION EXPRESION
           | OP_UNARIO ID
           | ID OP_UNARIO
@@ -208,13 +261,27 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION
 	      | ID OP_DECREMENTO EXPRESION
           | ID OP_INCREMENTO ID OP_LIST_ARITMETICA EXPRESION
           | INI_PARENTESIS EXPRESION FIN_PARENTESIS
-          | CAB_PROCEDIMIENTO 
+          | INI_PARENTESIS EXPRESION error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
+          | PROCEDIMIENTO 
           | NUMERO
           | ID
 ;
 
+PROCEDIMIENTO : ID INI_PARENTESIS ARGUMENTOS FIN_PARENTESIS
+              | ID INI_PARENTESIS ARGUMENTOS error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
+              | ID INI_PARENTESIS FIN_PARENTESIS
+              | ID INI_PARENTESIS error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
+;
+
+ARGUMENTOS : ARGUMENTOS COMA ID
+          | ID
+;
+
 EST_AGREGADO : INI_AGREGADO AGREGADOS FIN_AGREGADO
-		| INI_AGREGADO FIN_AGREGADO
+             | error AGREGADOS FIN_PARENTESIS {printf(", expected: 'INI_AGREGADO'\n"); yyerrok;}
+		     | INI_AGREGADO FIN_AGREGADO
+             | error FIN_AGREGADO {printf(", expected: 'INI_AGREGADO'\n"); yyerrok;}
+;
 
 AGREGADOS : EXPRESION COMA AGREGADOS
           | EXPRESION
@@ -228,6 +295,8 @@ AGREGADOS : EXPRESION COMA AGREGADOS
 
 OP_UNARIO : OP_INCREMENTO | OP_LIST_UNARIO | OP_DECREMENTO
 ;
+
+NUMERO : REAL | ENTERO;
 
 /* Fin reglas gramaticales */
 
