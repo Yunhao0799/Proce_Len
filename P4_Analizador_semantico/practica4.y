@@ -27,7 +27,7 @@ typedef enum{
 
 typedef struct{
 	tipoEntrada entrada;
-	char* nombre;
+	char nombre[100];
 	dTipo tipoDato;
 	unsigned int parametros;
 } entradaTS;
@@ -41,7 +41,7 @@ entradaTS TS[MAX_TS];
 
 typedef struct{
 	int atributo;
-	char* lexema;
+	char lexema[100];
 	dTipo tipo;
 } atributos;
 
@@ -69,8 +69,7 @@ void verificarDescononocidos(unsigned int atributo){
 	while(TS[aux].tipoDato == desconocido){
 		TS[aux].tipoDato = atributo;
 		aux --;
-	}
-		
+	}	
 	
 }
 
@@ -78,14 +77,14 @@ void insertarIdentificador(char* id, unsigned int atributo){
 	verificarDescononocidos(atributo);
 
 	TS[TOPE].entrada = variable;
-	TS[TOPE].nombre = id;
+    strcpy(TS[TOPE].nombre, id);
 	TS[TOPE].tipoDato = atributo;
 	TOPE ++;
 }
 
 void insertarDescnonocido(char* id){
 	TS[TOPE].entrada = variable;
-	TS[TOPE].nombre = id;
+    strcpy(TS[TOPE].nombre, id);
 	TS[TOPE].tipoDato = desconocido;
 	TOPE ++;
 }
@@ -96,7 +95,7 @@ void mostrarTabla(){
 		if(TS[i].entrada == marca){
 			printf("%d\n", TS[i].entrada);
 		}else
-			printf("%d nombre = %s tipoDato = %d \n", TS[i].entrada,TS[i].nombre,TS[i].tipoDato);
+			printf("%d nombre = '%s' tipoDato = %d \n", TS[i].entrada,TS[i].nombre,TS[i].tipoDato);
 	}
 	printf("------------------------------------------------\n");
 }
@@ -268,11 +267,11 @@ TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR; {$$.tipo = lista;}
 //           | OP_LOGICO
 //;
 
-ASIGNACION : ID OP_ASIGNACION EXPRESION {$$.lexema = $1.lexema;}
+ASIGNACION : ID OP_ASIGNACION EXPRESION {strcpy($$.lexema, $1.lexema);}
            | ID error EXPRESION {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
-           | ID OP_ASIGNACION ASIGNACION {$$.lexema = $1.lexema;}
+           | ID OP_ASIGNACION ASIGNACION {strcpy($$.lexema, $1.lexema);}
            | ID error ASIGNACION {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
-           | ID OP_ASIGNACION EST_AGREGADO {$$.lexema = $1.lexema;}
+           | ID OP_ASIGNACION EST_AGREGADO {strcpy($$.lexema, $1.lexema);}
            | ID error EST_AGREGADO {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
 ;
 

@@ -90,7 +90,7 @@ COMENTARIO_UNA_LINEA ("//".*"\n")
 "="|":="              			return OP_ASIGNACION;
 {ENTERO}           			return ENTERO;
 {REAL}      				return REAL;
-{IDENTIFICADOR}        			{yyval.lexema = strdup(yytext); return ID;}
+{IDENTIFICADOR}        			{strcpy(yylval.lexema, yytext); return ID;}
 
 
 .                           		printf("\033[1;31mError:  \033[0m Simbolo erroneo: '%s' en linea: %d\n", yytext, num_lineas);
