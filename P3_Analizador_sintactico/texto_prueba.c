@@ -1,9 +1,8 @@
 //Un programa C para probar el analizador
 
 principal(){
-	entero var1 = 2, var2, numero2 = 10;
-	real numero;
-	bool bit = 0, bit2;
+	entero var1 = 2 var2, numero2 = 10
+	bool bit = 0 bit2;
 	
 	elevarCuadrado(entero numero){
 		numero = numero * numero;
