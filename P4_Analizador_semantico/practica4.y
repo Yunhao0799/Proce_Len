@@ -5,6 +5,7 @@
     #include <stdio.h>
 
     int yylex();
+    int yylineno;
     void yyerror(const char *s);
 
 /* Inicio definicion de la tabla de simbolos */
@@ -146,12 +147,11 @@ void mostrarTabla(){
 }
 
 
-
-
-
 /* Fin definicion funciones */
 
 %}
+
+%error-verbose
 
 /* Inicio definicion precedencia de operadores  */
 /* Cuanto mas abajo mas prioritario */
@@ -281,14 +281,14 @@ CADENA : CADENA ID
 
 BUCLE_FOR : BUCLE_PARA ID OP_ASIGNACION NUMERO MODO_FOR NUMERO FINPARA CANTIDAD_CODIGO;
 
-SENTENCIA_SI : BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO SINO CANTIDAD_CODIGO {if($3.tipo != bool){printf("Expresión no booleana en línea %d.\n",0);exit(-1);}}
-             | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO {if($3.tipo != bool){printf("Expresión no booleana en línea %d.\n",0);exit(-1);}}
+SENTENCIA_SI : BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO SINO CANTIDAD_CODIGO {if($3.tipo != bool){printf("Expresión no booleana en línea %d.\n",yylineno);}}
+             | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO {if($3.tipo != bool){printf("Expresión no booleana en línea %d.\n",yylineno);}}
 	     | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS error CANTIDAD_CODIGO {yyerrok;}
 	     | BUCLE_SI INI_PARENTESIS error FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO {yyerrok;}
 ;
 
 
-BUCLE_WHILE : BUCLE_MIENTRAS INI_PARENTESIS EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {if($3.tipo != bool){printf("Expresión no booleana en línea %d.\n",0);exit(-1);}} 
+BUCLE_WHILE : BUCLE_MIENTRAS INI_PARENTESIS EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {if($3.tipo != bool){printf("Expresión no booleana en línea %d.\n",yylineno);}} 
             | BUCLE_MIENTRAS error EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {yyerrok;}
             | BUCLE_MIENTRAS INI_PARENTESIS EXPRESION error CANTIDAD_CODIGO {yyerrok;}
 ;
@@ -303,27 +303,27 @@ TIPO_BASICO : TIPO_VAR {if (flag==1){ flag=0;} else{tipotmp=$$.tipo = $1.tipo;}}
 TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR {tipotmp= $$.tipo = lista;flag=1;}
 ;
 
-ASIGNACION : ID OP_ASIGNACION EXPRESION {if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",0);exit(-1);};}
+ASIGNACION : ID OP_ASIGNACION EXPRESION {if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",yylineno);};}
+           | ID error EXPRESION {yyerrok;}
+           | ID OP_ASIGNACION ASIGNACION {if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",yylineno);};}
            | ID error ASIGNACION {yyerrok;}
-           | ID OP_ASIGNACION ASIGNACION {if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",0);exit(-1);};}
-           | ID error ASIGNACION {yyerrok;}
-           | ID OP_ASIGNACION EST_AGREGADO {if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",0);exit(-1);};}
+           | ID OP_ASIGNACION EST_AGREGADO {if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",yylineno);};}
            | ID error EST_AGREGADO {yyerrok;}
 ;
 
-EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",0);exit(-1);}}
+EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
           | EXPRESION OP_ADD_MI_ARITMETICA error {yyerrok;}
-          | EXPRESION OP_ADD_PL_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",0);exit(-1);}}
+          | EXPRESION OP_ADD_PL_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
           | EXPRESION OP_ADD_PL_ARITMETICA error {yyerrok;}
-          | EXPRESION OP_MULT_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",0);exit(-1);}}
+          | EXPRESION OP_MULT_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
           | EXPRESION OP_MULT_ARITMETICA error {yyerrok;}
-          | EXPRESION OP_LIST_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",0);exit(-1);}}
+          | EXPRESION OP_LIST_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylen);}}
           | EXPRESION OP_LIST_ARITMETICA error {yyerrok;}
           | EXPRESION OP_AND_LOGICO EXPRESION  {if($1.tipo == bool && $3.tipo == bool){$$.tipo = bool;}else{$$.tipo=desconocido;}}
           | EXPRESION OP_AND_LOGICO error {yyerrok;}
           | EXPRESION OP_OR_LOGICO EXPRESION {if($1.tipo == bool && $3.tipo == bool){$$.tipo = bool;}else{$$.tipo=desconocido;}}
           | EXPRESION OP_OR_LOGICO error {yyerrok;}
-          | EXPRESION OP_EXOR_LOGICO EXPRESION {if($1.tipo == bool && $3.tipo == bool){$$.tipo = bool;}else{printf("Expresion logica erronea en linea %d.\n",0);exit(-1);}}
+          | EXPRESION OP_EXOR_LOGICO EXPRESION {if($1.tipo == bool && $3.tipo == bool){$$.tipo = bool;}else{printf("Expresion logica erronea en linea %d.\n",yylineno);}}
           | EXPRESION OP_EXOR_LOGICO error {yyerrok;}
           | EXPRESION OP_IGUALDAD_LOGICO EXPRESION {if($1.tipo == $3.tipo){$$.tipo = bool;}else{$$.tipo=desconocido;}}
           | EXPRESION OP_IGUALDAD_LOGICO error {yyerrok;}
@@ -338,7 +338,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.
           | INI_PARENTESIS EXPRESION error {yyerrok;}
           | NUMERO {$$.tipo = $1.tipo;}
           | LOGICO {$$.tipo = $1.tipo;}
-          | ID {if(comprobarExistencia(&$1) == 1){printf("Uso de variable '%s' no definida en linea %d.\n",$1.lexema,0);exit(-1);}else{$$.tipo = $1.tipo;}}
+          | ID {if(comprobarExistencia(&$1) == 1){printf("Uso de variable '%s' no definida en linea %d.\n",$1.lexema,yylineno);}else{$$.tipo = $1.tipo;}}
 ;
 
 PROCEDIMIENTO : ID INI_PARENTESIS ARGUMENTOS FIN_PARENTESIS
@@ -357,7 +357,7 @@ EST_AGREGADO : INI_AGREGADO AGREGADOS FIN_AGREGADO {$$.tipo = $2.tipo;}
              | error FIN_AGREGADO {yyerrok;}
 ;
 
-AGREGADOS : EXPRESION COMA AGREGADOS {if($1.tipo != $3.tipo){printf("Mezcla de tipos en agregado de linea %d.\n",0); exit(-1);}else{$$.tipo = $1.tipo;}}
+AGREGADOS : EXPRESION COMA AGREGADOS {if($1.tipo != $3.tipo){printf("Mezcla de tipos en agregado de linea %d.\n",yylineno);}else{$$.tipo = $1.tipo;}}
           | EXPRESION {$$.tipo = $1.tipo;}
 ;
 
@@ -385,5 +385,5 @@ int main (int argc, char** argv) {
 }
 
 void yyerror(const char* s){
-    printf("\033[1;31m%s en linea %d.\n\033[0m", s, 0);
+    printf("\033[1;31m%s en linea %d.\n\033[0m", s, yylineno);
 }

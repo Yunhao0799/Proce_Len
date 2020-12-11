@@ -1,7 +1,7 @@
 //Un programa C para probar el analizador
 
 principal(){
-	entero var1 = 2, var2, numero2 = 10;
+	entero var1 = 2.0, var2, numero2 = 10
 	real numero;
 	bool bit;
 	
