@@ -3,7 +3,7 @@
 principal(){
 	entero var1 = 2, var2, numero2 = 10;
 	real numero;
-	bool bit = 0, bit2;
+	bool bit;
 	
 	elevarCuadrado(entero numero){
 		numero = numero * numero;
