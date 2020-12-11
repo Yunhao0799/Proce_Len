@@ -5,7 +5,7 @@ ifneq ($(OS),Windows_NT)
 	UNAME_S := $(shell uname -s)
 	ifneq ($(UNAME_S),Darwin)
 		OSFLAG += -lfl
-		YACC_VERSION := byacc
+		YACC_VERSION := yacc
 	endif
 endif
 
