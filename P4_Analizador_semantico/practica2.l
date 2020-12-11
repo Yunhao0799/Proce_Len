@@ -55,7 +55,7 @@ COMENTARIO_UNA_LINEA ("//".*"\n")
 "**"			    		{yylval.tipo = 0; return OP_LIST_ARITMETICA;}
 "*"			        	{yylval.tipo = 0; return OP_MULT_ARITMETICA;}
 
-"/"				        {yyval.tipo = 1; return OP_MULT_ARITMETICA;}
+"/"				        {yylval.tipo = 1; return OP_MULT_ARITMETICA;}
 "%"		        		{yylval.tipo = 2; return OP_MULT_ARITMETICA;}
 "@"				        {yylval.tipo = 1; return OP_LIST_ARITMETICA;}
 "#"	        			{yylval.tipo = 0; return OP_LIST_UNARIO;}

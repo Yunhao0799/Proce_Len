@@ -32,6 +32,9 @@ typedef struct{
 	unsigned int parametros;
 } entradaTS;
 
+unsigned int tipotmp=0;
+unsigned int flag=0;
+
 #define MAX_TS 500
 
 unsigned int TOPE = 0;
@@ -116,7 +119,7 @@ void insertarDesconocido(char* id){
 		
 	TS[TOPE].entrada = variable;
         strcpy(TS[TOPE].nombre, id);
-	TS[TOPE].tipoDato = desconocido;
+	TS[TOPE].tipoDato = tipotmp;
 	TOPE ++;
 }
 
@@ -278,9 +281,9 @@ TIPO_DATO : TIPO_BASICO {$$.tipo = $1.tipo;}
           | TIPO_COMPLEJO {$$.tipo = $1.tipo;}
 ;
 
-TIPO_BASICO : TIPO_VAR; {$$.tipo = $1.tipo;}
+TIPO_BASICO : TIPO_VAR; {if (flag==1){ flag=0;} else{tipotmp=$$.tipo = $1.tipo;}}
 
-TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR; {$$.tipo = lista;}
+TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR; {tipotmp= $$.tipo = lista;flag=1;}
 
 ASIGNACION : ID OP_ASIGNACION EXPRESION {strcpy($$.lexema, $1.lexema); if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",yylineno);exit(-1);};}
            | ID error EXPRESION {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
@@ -296,7 +299,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.
           | EXPRESION OP_ADD_PL_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_MULT_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
           | EXPRESION OP_MULT_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
-	  | EXPRESION OP_LIST_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
+          | EXPRESION OP_LIST_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
           | EXPRESION OP_LIST_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_AND_LOGICO EXPRESION  {if($1.tipo == bool && $3.tipo == bool){$$.tipo = bool;}else{$$.tipo=desconocido;}}
           | EXPRESION OP_AND_LOGICO error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
@@ -309,8 +312,8 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.
           | NEGACION EXPRESION {if($2.tipo == bool){$$.tipo = bool;}else{$$.tipo=desconocido;}}
           | OP_UNARIO ID
           | ID OP_UNARIO
-	  | OP_ADD_MI_ARITMETICA ID
-	  | ID OP_DECREMENTO EXPRESION
+          | OP_ADD_MI_ARITMETICA ID
+          | ID OP_DECREMENTO EXPRESION
           | ID OP_INCREMENTO ID OP_LIST_ARITMETICA EXPRESION
           | INI_PARENTESIS EXPRESION FIN_PARENTESIS {$$.tipo = $2.tipo;}
           | INI_PARENTESIS EXPRESION error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
