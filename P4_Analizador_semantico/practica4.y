@@ -216,8 +216,8 @@ CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS
                   | ID INI_PARENTESIS error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
 
-PARAMETRO : PARAMETRO COMA TIPO_DATO ID {insertarIdentificador($4.lexema, $3.tipo);}
-          | TIPO_DATO ID {insertarMarca(); insertarIdentificador($2.lexema, $1.tipo);}
+PARAMETRO : PARAMETRO COMA TIPO_DATO ID
+          | TIPO_DATO ID 
 ;
 
 DECL_VAR_LOCALES : VAR_LOCAL
