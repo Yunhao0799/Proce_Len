@@ -83,8 +83,20 @@ void comprobarDeclarados(char* nuevo){
 		}
 		aux --;
 	}
+	
+}
 
-	printf("comprobarDeclarados ejecutado \n");
+int comprobarExistencia(char* nuevo){
+	unsigned int aux = TOPE-1;
+
+	while(TS[aux].entrada != marca){
+		if(strcmp(TS[aux].nombre,nuevo) == 0){
+			return 0;
+		}else
+			aux --;
+	}
+
+	return 1;
 	
 }
 
@@ -167,9 +179,9 @@ CAB_PROGRAMA : PRINCIPAL INI_PARENTESIS FIN_PARENTESIS
              | PRINCIPAL INI_PARENTESIS error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
 
-BLOQUE : INI_BLOQUE {insertarMarca(); mostrarTabla();}
+BLOQUE : INI_BLOQUE {insertarMarca();}
 	OPCIONES 
-	FIN_BLOQUE {vaciarEntradas();mostrarTabla();}
+	FIN_BLOQUE {vaciarEntradas();}
 ;
 
 
@@ -198,16 +210,16 @@ DECL_VAR_LOCALES : VAR_LOCAL
                  | CONSTANTE VAR_LOCAL
 ;
 
-VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA {insertarIdentificador($3.lexema, $1.tipo);mostrarTabla();}
-          | TIPO_DATO ID PUNTOYCOMA {insertarIdentificador($2.lexema, $1.tipo);mostrarTabla();}
-          | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA {insertarIdentificador($3.lexema, $1.tipo);mostrarTabla();}
-          | TIPO_DATO ASIGNACION PUNTOYCOMA {insertarIdentificador($2.lexema, $1.tipo);mostrarTabla();}
+VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA {insertarIdentificador($3.lexema, $1.tipo);}
+          | TIPO_DATO ID PUNTOYCOMA {insertarIdentificador($2.lexema, $1.tipo);}
+          | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA {insertarIdentificador($3.lexema, $1.tipo);}
+          | TIPO_DATO ASIGNACION PUNTOYCOMA {insertarIdentificador($2.lexema, $1.tipo);}
 ;
 
-DECL_MULTIPLE : DECL_MULTIPLE ID COMA {insertarDesconocido($2.lexema); mostrarTabla();}
-              | DECL_MULTIPLE ASIGNACION COMA {insertarDesconocido($2.lexema); mostrarTabla();}
-              | ID COMA {insertarDesconocido($1.lexema); mostrarTabla();}
-              | ASIGNACION COMA {insertarDesconocido($1.lexema); mostrarTabla();}
+DECL_MULTIPLE : DECL_MULTIPLE ID COMA {insertarDesconocido($2.lexema);}
+              | DECL_MULTIPLE ASIGNACION COMA {insertarDesconocido($2.lexema);}
+              | ID COMA {insertarDesconocido($1.lexema);}
+              | ASIGNACION COMA {insertarDesconocido($1.lexema);}
 ;
 
 SENTENCIAS : BUCLE_FOR
@@ -252,12 +264,12 @@ CADENA : CADENA ID
 
 BUCLE_FOR : BUCLE_PARA ID OP_ASIGNACION NUMERO MODO_FOR NUMERO FINPARA CANTIDAD_CODIGO;
 
-SENTENCIA_SI : BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO SINO CANTIDAD_CODIGO
-             | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO
+SENTENCIA_SI : BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO SINO CANTIDAD_CODIGO {if($3.tipo != bool){printf("Expresión no booleana en línea %d.\n",yylineno);exit(-1);}}
+             | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO {if($3.tipo != bool){printf("Expresión no booleana en línea %d.\n",yylineno);exit(-1);}}
 ;
 
 
-BUCLE_WHILE : BUCLE_MIENTRAS INI_PARENTESIS EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO
+BUCLE_WHILE : BUCLE_MIENTRAS INI_PARENTESIS EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {if($3.tipo != bool){printf("Expresión no booleana en línea %d.\n",yylineno);exit(-1);}} 
             | BUCLE_MIENTRAS error EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
             | BUCLE_MIENTRAS INI_PARENTESIS EXPRESION error CANTIDAD_CODIGO {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
@@ -270,40 +282,40 @@ TIPO_BASICO : TIPO_VAR; {$$.tipo = $1.tipo;}
 
 TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR; {$$.tipo = lista;}
 
-ASIGNACION : ID OP_ASIGNACION EXPRESION {strcpy($$.lexema, $1.lexema);}
+ASIGNACION : ID OP_ASIGNACION EXPRESION {strcpy($$.lexema, $1.lexema); if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",yylineno);exit(-1);};}
            | ID error EXPRESION {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
-           | ID OP_ASIGNACION ASIGNACION {strcpy($$.lexema, $1.lexema);}
+           | ID OP_ASIGNACION ASIGNACION {strcpy($$.lexema, $1.lexema); if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",yylineno);exit(-1);};}
            | ID error ASIGNACION {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
-           | ID OP_ASIGNACION EST_AGREGADO {strcpy($$.lexema, $1.lexema);}
+           | ID OP_ASIGNACION EST_AGREGADO {strcpy($$.lexema, $1.lexema); if($1.tipo != $3.tipo){printf("Asignacion de tipos invalida en la linea %d.\n",yylineno);exit(-1);};}
            | ID error EST_AGREGADO {printf(", expected: 'OP_ASIGNACION'\n"); yyerrok;}
 ;
 
-EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION
+EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
           | EXPRESION OP_ADD_MI_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
-          | EXPRESION OP_ADD_PL_ARITMETICA EXPRESION
+          | EXPRESION OP_ADD_PL_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
           | EXPRESION OP_ADD_PL_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
-          | EXPRESION OP_MULT_ARITMETICA EXPRESION
+          | EXPRESION OP_MULT_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
           | EXPRESION OP_MULT_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
-	      | EXPRESION OP_LIST_ARITMETICA EXPRESION
+	  | EXPRESION OP_LIST_ARITMETICA EXPRESION {if($1.tipo == $3.tipo){$$.tipo = $1.tipo;}else{printf("Operacion de tipos incompatibles en linea %d\n",yylineno);}}
           | EXPRESION OP_LIST_ARITMETICA error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
-          | EXPRESION OP_AND_LOGICO EXPRESION 
+          | EXPRESION OP_AND_LOGICO EXPRESION  {if($1.tipo == bool && $3.tipo == bool){$$.tipo = bool;}else{$$.tipo=desconocido;}}
           | EXPRESION OP_AND_LOGICO error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
-          | EXPRESION OP_OR_LOGICO EXPRESION
+          | EXPRESION OP_OR_LOGICO EXPRESION {if($1.tipo == bool && $3.tipo == bool){$$.tipo = bool;}else{$$.tipo=desconocido;}}
           | EXPRESION OP_OR_LOGICO error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_EXOR_LOGICO EXPRESION
           | EXPRESION OP_EXOR_LOGICO error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
-          | EXPRESION OP_IGUALDAD_LOGICO EXPRESION
+          | EXPRESION OP_IGUALDAD_LOGICO EXPRESION {if($1.tipo == $2.tipo){$$.tipo = bool;}else{$$.tipo=desconocido;}}
           | EXPRESION OP_IGUALDAD_LOGICO error {printf(", expected: 'EXPRESION'\n"); yyerrok;}
-          | NEGACION EXPRESION
+          | NEGACION EXPRESION {if($2.tipo == bool){$$.tipo = bool;}else{$$.tipo=desconocido;}}
           | OP_UNARIO ID
           | ID OP_UNARIO
-	      | OP_ADD_MI_ARITMETICA ID
-	      | ID OP_DECREMENTO EXPRESION
+	  | OP_ADD_MI_ARITMETICA ID
+	  | ID OP_DECREMENTO EXPRESION
           | ID OP_INCREMENTO ID OP_LIST_ARITMETICA EXPRESION
-          | INI_PARENTESIS EXPRESION FIN_PARENTESIS
+          | INI_PARENTESIS EXPRESION FIN_PARENTESIS {$$.tipo = $2.tipo;}
           | INI_PARENTESIS EXPRESION error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
-          | NUMERO
-          | ID
+          | NUMERO {$$.tipo = $1.tipo;}
+          | ID {if(comprobarExistencia($1.lexema) == 1){printf("Uso de variable no definida en linea %d.\n",yylineno);exit(-1);}else{$$.tipo = $1.tipo;}}
 ;
 
 PROCEDIMIENTO : ID INI_PARENTESIS ARGUMENTOS FIN_PARENTESIS
@@ -316,20 +328,22 @@ ARGUMENTOS : ARGUMENTOS COMA ID
           | ID
 ;
 
-EST_AGREGADO : INI_AGREGADO AGREGADOS FIN_AGREGADO
+EST_AGREGADO : INI_AGREGADO AGREGADOS FIN_AGREGADO {$$.tipo = $2.tipo;}
              | error AGREGADOS FIN_PARENTESIS {printf(", expected: 'INI_AGREGADO'\n"); yyerrok;}
-		     | INI_AGREGADO FIN_AGREGADO
+	     | INI_AGREGADO FIN_AGREGADO
              | error FIN_AGREGADO {printf(", expected: 'INI_AGREGADO'\n"); yyerrok;}
 ;
 
-AGREGADOS : EXPRESION COMA AGREGADOS
-          | EXPRESION
+AGREGADOS : EXPRESION COMA AGREGADOS {if($1.tipo != $3.tipo){printf("Mezcla de tipos en agregado de linea %d.\n",yylineno);}else{$$.tipo = $1.tipo;} $$.tipo = $1.tipo;}
+          | EXPRESION {$$.tipo = $1.tipo;}
 ;
 
 OP_UNARIO : OP_INCREMENTO | OP_LIST_UNARIO | OP_DECREMENTO
 ;
 
-NUMERO : REAL | ENTERO;
+NUMERO : REAL {$$.tipo = $1.tipo;}
+	 | ENTERO{$$.tipo = $1.tipo;}
+;
 
 /* Fin reglas gramaticales */
 
