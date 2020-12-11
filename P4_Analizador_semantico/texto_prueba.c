@@ -13,7 +13,7 @@ principal(){
         real nada;
         entero otro, var2;
         si (1==1)entonces {
-            
+
         }
         numero1 = (numero1 * -numero2) % 5;
     }
@@ -39,7 +39,7 @@ principal(){
     lista de bool lista1 = [bit];
     lista de real lista2 = [2.3,5.1], lista3 = [1.0];
     lista2 = lista2 ** lista3;
-    lista2 = lista2 -- lista3;
+    lista2 = lista2 -- 5;
 
     $lista2;
     lista2 >>;

@@ -472,12 +472,18 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                     }else{
                                                                         $$.tipo = $1.tipo;
                                                                     }
+                                                                    if($3.tipo != entero){
+                                                                        printf("En linea %d: Uso de una expresion de tipo distinto a entero.\n",yylineno);
+                                                                    }
                                                                 }
           | ID OP_INCREMENTO ID OP_LIST_ARITMETICA EXPRESION    {
                                                                     if(comprobarExistencia(&$1) == 1){
                                                                         printf("En linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
                                                                     }else{
                                                                         $$.tipo = $1.tipo;
+                                                                    }
+                                                                    if($3.tipo != entero){
+                                                                        printf("En linea %d: Uso de una expresion de tipo distinto a entero.\n",yylineno);
                                                                     }
                                                                 }
           | INI_PARENTESIS EXPRESION FIN_PARENTESIS             {$$.tipo = $2.tipo;}
