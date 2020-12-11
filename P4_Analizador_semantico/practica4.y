@@ -106,7 +106,7 @@ int comprobarExistencia(char* nuevo){
 void insertarIdentificador(char* id, unsigned int atributo){
 	comprobarDeclarados(id);
 	
-	verificarDescononocidos(atributo);
+//	verificarDescononocidos(atributo);
 
 	TS[TOPE].entrada = variable;
     strcpy(TS[TOPE].nombre, id);
@@ -177,12 +177,12 @@ void mostrarTabla(){
 /* Inicio reglas gramaticales */
 S : CAB_PROGRAMA BLOQUE;
 
-CAB_PROGRAMA : PRINCIPAL INI_PARENTESIS FIN_PARENTESIS
+CAB_PROGRAMA : PRINCIPAL INI_PARENTESIS FIN_PARENTESIS {insertarMarca();}
              | PRINCIPAL error FIN_PARENTESIS {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
              | PRINCIPAL INI_PARENTESIS error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
 
-BLOQUE : INI_BLOQUE {insertarMarca();}
+BLOQUE : INI_BLOQUE //{insertarMarca();}
 	OPCIONES 
 	FIN_BLOQUE {vaciarEntradas();}
 ;
@@ -197,7 +197,7 @@ OPCIONES : OPCIONES DECL_VAR_LOCALES
 DECL_PROCEDIMIENTO : CAB_PROCEDIMIENTO BLOQUE;
 
 
-CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS
+CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS 
                   | ID INI_PARENTESIS FIN_PARENTESIS
                   | ID error PARAMETRO FIN_PARENTESIS {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
                   | ID error FIN_PARENTESIS {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
@@ -205,8 +205,8 @@ CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS
                   | ID INI_PARENTESIS error {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
 
-PARAMETRO : PARAMETRO COMA TIPO_DATO ID
-          | TIPO_DATO ID 
+PARAMETRO : PARAMETRO COMA TIPO_DATO ID {insertarIdentificador($4.lexema, $3.tipo);}
+          | TIPO_DATO ID {insertarMarca(); insertarIdentificador($2.lexema, $1.tipo);}
 ;
 
 DECL_VAR_LOCALES : VAR_LOCAL
