@@ -90,13 +90,15 @@ void vaciarEntradas(){
 
 //comprueba si un identificador ya esta declarado o no
 // esta se usa para cuando estamos declarando variables, si declaras 2 veces la segunda no es valida
-void comprobarDeclarados(char* nuevo){
+void comprobarDeclarados(char* nuevo, int modoParametros){
     unsigned int aux = TOPE-1;
 
     while(TS[aux].entrada != marca){
         if(strcmp(TS[aux].nombre,nuevo) == 0){
-            printf("En linea %d: La variable de nombre '%s' ya esta definida.\n",yylineno, nuevo);
-            exit(-1);
+            if (modoParametros==0){
+                printf("En linea %d: El identificador de nombre '%s' ya esta definido.\n",yylineno, nuevo);
+                exit(-1);
+            }
         }
         aux --;
     }
@@ -137,7 +139,7 @@ void ComprobarNArgs(char* item, int n_args){
 void verificarParametros(){
 
     while(topeBuffer > 0){
-        comprobarDeclarados(buffer[topeBuffer-1].nombre);
+        comprobarDeclarados(buffer[topeBuffer-1].nombre, 1);
         TS[TOPE].entrada = buffer[topeBuffer-1].entrada;
         strcpy(TS[TOPE].nombre, buffer[topeBuffer-1].nombre);
         TS[TOPE].tipoDato = buffer[topeBuffer-1].tipoDato;
@@ -150,7 +152,7 @@ void verificarParametros(){
 
 //para insertar los identificadores de forma normal
 void insertarIdentificador(char* id, unsigned int atributo, int lista){
-    comprobarDeclarados(id);
+    comprobarDeclarados(id, 0);
 
     TS[TOPE].entrada = variable;
     strcpy(TS[TOPE].nombre, id);
@@ -171,7 +173,7 @@ void insertarParametro(char* id, unsigned int atributo, int lista){
 
 // para insertar procedimientos
 void insertarProcedimiento(char* id, int nparams){
-    comprobarDeclarados(id);
+    comprobarDeclarados(id, 0);
 
     TS[TOPE].entrada = procedimiento;
     strcpy(TS[TOPE].nombre, id);
@@ -229,64 +231,64 @@ void insertarProcedimiento(char* id, int nparams){
 S : CAB_PROGRAMA BLOQUE;
 
 CAB_PROGRAMA : PRINCIPAL INI_PARENTESIS FIN_PARENTESIS
-            | PRINCIPAL error FIN_PARENTESIS {yyerrok;}
-            | PRINCIPAL INI_PARENTESIS error {yyerrok;}
+             | PRINCIPAL error FIN_PARENTESIS {yyerrok;}
+             | PRINCIPAL INI_PARENTESIS error {yyerrok;}
 ;
 
 BLOQUE : INI_BLOQUE {insertarMarca(0);}
-    OPCIONES 
-    FIN_BLOQUE {vaciarEntradas();}
-    | error OPCIONES FIN_BLOQUE {yyerrok;}
+         OPCIONES 
+         FIN_BLOQUE {vaciarEntradas();}
+       | error OPCIONES FIN_BLOQUE {yyerrok;}
     //   | INI_BLOQUE OPCIONES error {yyerrok;}
 ;
 
 OPCIONES : OPCIONES DECL_VAR_LOCALES 
-        | OPCIONES DECL_PROCEDIMIENTO
-        | OPCIONES SENTENCIAS 
-        |
+         | OPCIONES DECL_PROCEDIMIENTO
+         | OPCIONES SENTENCIAS 
+         |
 ;
 
 DECL_PROCEDIMIENTO : CAB_PROCEDIMIENTO BLOQUE;
 
 
 CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS  {insertarProcedimiento($1.lexema, n_parametros); n_parametros=0;}
-                | ID INI_PARENTESIS FIN_PARENTESIS            {insertarProcedimiento($1.lexema, 0);}
-                | ID error PARAMETRO FIN_PARENTESIS           {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
-                | ID error FIN_PARENTESIS                     {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
-                | ID INI_PARENTESIS PARAMETRO error           {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
-                | ID INI_PARENTESIS error                     {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
+                  | ID INI_PARENTESIS FIN_PARENTESIS            {insertarProcedimiento($1.lexema, 0);}
+                  | ID error PARAMETRO FIN_PARENTESIS           {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
+                  | ID error FIN_PARENTESIS                     {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
+                  | ID INI_PARENTESIS PARAMETRO error           {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
+                  | ID INI_PARENTESIS error                     {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
 
 PARAMETRO : PARAMETRO COMA TIPO_DATO ID {n_parametros++;insertarParametro($4.lexema, $3.tipo, $3.lista);}
-        | TIPO_DATO ID                {n_parametros++;insertarParametro($2.lexema, $1.tipo, $1.lista);}
+          | TIPO_DATO ID                {n_parametros++;insertarParametro($2.lexema, $1.tipo, $1.lista);}
 ;
 
 DECL_VAR_LOCALES : VAR_LOCAL
-                | CONSTANTE VAR_LOCAL
+                 | CONSTANTE VAR_LOCAL
 ;
 
 VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA           {insertarIdentificador($3.lexema, $1.tipo, $1.lista);
                                                             listatmp=tipotmp=-1;}
-        | TIPO_DATO ID PUNTOYCOMA                         {insertarIdentificador($2.lexema, $1.tipo, $1.lista);
+          | TIPO_DATO ID PUNTOYCOMA                         {insertarIdentificador($2.lexema, $1.tipo, $1.lista);
                                                             listatmp=tipotmp=-1;}
-        | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA   {tipotmp=listatmp=-1;}
-        | TIPO_DATO ASIGNACION PUNTOYCOMA                 {tipotmp=listatmp=-1;}
+          | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA   {tipotmp=listatmp=-1;}
+          | TIPO_DATO ASIGNACION PUNTOYCOMA                 {tipotmp=listatmp=-1;}
 ;
 
 DECL_MULTIPLE : DECL_MULTIPLE ID COMA               {insertarIdentificador($2.lexema, tipotmp, listatmp);}
-            | DECL_MULTIPLE ASIGNACION COMA       {  }
-            | ID COMA                             {insertarIdentificador($1.lexema, tipotmp, listatmp); }
-            | ASIGNACION COMA                     {  }
+              | DECL_MULTIPLE ASIGNACION COMA       {  }
+              | ID COMA                             {insertarIdentificador($1.lexema, tipotmp, listatmp); }
+              | ASIGNACION COMA                     {  }
 ;
 
 SENTENCIAS : BUCLE_FOR
-        | BUCLE_WHILE
-        | SENTENCIA_SI
-        | ASIGNACION PUNTOYCOMA
-        | SENTENCIA_ENTRADA PUNTOYCOMA
-        | SENTENCIA_SALIDA PUNTOYCOMA
-        | EXPRESION PUNTOYCOMA
-        | SENTENCIA_LIST ID PUNTOYCOMA   {
+           | BUCLE_WHILE
+           | SENTENCIA_SI
+           | ASIGNACION PUNTOYCOMA
+           | SENTENCIA_ENTRADA PUNTOYCOMA
+           | SENTENCIA_SALIDA PUNTOYCOMA
+           | EXPRESION PUNTOYCOMA
+           | SENTENCIA_LIST ID PUNTOYCOMA   {
                                                 if(comprobarExistencia(&$2) == 1){
                                                     printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
                                                 }else{
@@ -294,7 +296,7 @@ SENTENCIAS : BUCLE_FOR
                                                         printf("Error en linea %d: Uso de sentencias en variables simples.\n",yylineno);
                                                 }
                                             }
-        | ID SENTENCIA_LIST PUNTOYCOMA   {
+           | ID SENTENCIA_LIST PUNTOYCOMA   {
                                                 if(comprobarExistencia(&$1) == 1){
                                                     printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
                                                 }else{
@@ -302,7 +304,7 @@ SENTENCIAS : BUCLE_FOR
                                                         printf("Error en linea %d: Uso de sentencias en variables simples.\n",yylineno);
                                                 }
                                             }
-        | PROCEDIMIENTO PUNTOYCOMA
+           | PROCEDIMIENTO PUNTOYCOMA
 ;
 
 SENTENCIA_ENTRADA : ENTRADA INI_PARENTESIS LISTA_VAR FIN_PARENTESIS 
@@ -317,7 +319,7 @@ SENTENCIA_SALIDA : SALIDA INI_PARENTESIS LIST_ESXP_O_CAD FIN_PARENTESIS
 ;
 
 LISTA_VAR : LISTA_VAR COMA ID
-        | ID
+          | ID
 ;
 
 LIST_ESXP_O_CAD : LIST_ESXP_O_CAD COMA EXPRESION
@@ -326,23 +328,23 @@ LIST_ESXP_O_CAD : LIST_ESXP_O_CAD COMA EXPRESION
                 | COMILLAS CADENA COMILLAS
 ;
 
-CANTIDAD_CODIGO : BLOQUE 
-        | SENTENCIAS
+CANTIDAD_CODIGO : BLOQUE        {verificarParametros();} //por si antes habia un bucle for para insertar la variable de control (tipica i/j/k/contador)
+                | SENTENCIAS    {verificarParametros();} //por si antes habia un bucle for para insertar la variable de control (tipica i/j/k/contador)
 ;
 
 CADENA : CADENA ID
-    | ID
+       | ID
 ;
 
-BUCLE_FOR : BUCLE_PARA ID OP_ASIGNACION NUMERO MODO_FOR NUMERO FINPARA CANTIDAD_CODIGO;
+BUCLE_FOR : BUCLE_PARA ID {insertarParametro($2.lexema, entero, 0);} OP_ASIGNACION NUMERO MODO_FOR NUMERO FINPARA CANTIDAD_CODIGO;
 
 SENTENCIA_SI : BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS
                 ENTONCES CANTIDAD_CODIGO
                 SINO CANTIDAD_CODIGO                            {if($3.tipo != bool){printf("En linea %d: Expresión no booleana.\n",yylineno);exit(-1);}}
-            | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS 
+             | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS 
                 ENTONCES CANTIDAD_CODIGO                        {if($3.tipo != bool){printf("En linea %d: Expresión no booleana.\n",yylineno);exit(-1);}}
-        | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS error CANTIDAD_CODIGO {yyerrok;}
-        | BUCLE_SI INI_PARENTESIS error FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO {yyerrok;}
+             | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS error CANTIDAD_CODIGO {yyerrok;}
+             | BUCLE_SI INI_PARENTESIS error FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO {yyerrok;}
 ;
 
 BUCLE_WHILE : BUCLE_MIENTRAS INI_PARENTESIS EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {if($3.tipo != bool){printf("En linea %d: Expresión no booleana.\n",yylineno);}} 
