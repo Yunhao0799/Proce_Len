@@ -41,6 +41,8 @@ principal(){
     lista de real lista2 = [2.3,5.1], lista3 = [1.0];
     lista2 = lista2 ** lista3;
     lista2 = lista2 -- 5;
+    
+    lista3 @ 7;
 
     $lista2;
     lista2 >>;
