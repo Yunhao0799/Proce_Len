@@ -33,7 +33,7 @@ typedef struct{
 	unsigned int parametros;
 } entradaTS;
 
-int tipotmp=-1;
+int tipotmp=-1, listatmp = -1;
 unsigned int flag=0;
 unsigned int n_parametros;
 unsigned int n_argumentos;
@@ -140,12 +140,13 @@ void verificarParametros(){
 
 }
 
-void insertarIdentificador(char* id, unsigned int atributo){
+void insertarIdentificador(char* id, unsigned int atributo, int lista){
 	comprobarDeclarados(id);
 
 	TS[TOPE].entrada = variable;
     strcpy(TS[TOPE].nombre, id);
 	TS[TOPE].tipoDato = atributo;
+	TS[TOPE].esLista = lista;
 	TOPE ++;
 }
 
@@ -234,7 +235,7 @@ DECL_PROCEDIMIENTO : CAB_PROCEDIMIENTO BLOQUE;
 
 
 CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS  {insertarProcedimiento($1.lexema, n_parametros); n_parametros=0;}
-                  | ID INI_PARENTESIS FIN_PARENTESIS            {insertarIdentificador($1.lexema, 0);}
+                  | ID INI_PARENTESIS FIN_PARENTESIS            {insertarIdentificador($1.lexema, 0,0);}
                   | ID error PARAMETRO FIN_PARENTESIS           {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
                   | ID error FIN_PARENTESIS                     {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
                   | ID INI_PARENTESIS PARAMETRO error           {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
@@ -249,15 +250,15 @@ DECL_VAR_LOCALES : VAR_LOCAL
                  | CONSTANTE VAR_LOCAL
 ;
 
-VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA           {insertarIdentificador($3.lexema, $1.tipo);tipotmp=-1;}
-          | TIPO_DATO ID PUNTOYCOMA                         {insertarIdentificador($2.lexema, $1.tipo);tipotmp=-1;}
+VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA           {insertarIdentificador($3.lexema, $1.tipo,$1.lista);tipotmp=-1;}
+          | TIPO_DATO ID PUNTOYCOMA                         {insertarIdentificador($2.lexema, $1.tipo, $1.lista);tipotmp=-1;}
           | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA   {tipotmp=-1;}
           | TIPO_DATO ASIGNACION PUNTOYCOMA                 {tipotmp=-1;}
 ;
 
-DECL_MULTIPLE : DECL_MULTIPLE ID COMA               {insertarIdentificador($2.lexema, tipotmp);}
+DECL_MULTIPLE : DECL_MULTIPLE ID COMA               {insertarIdentificador($2.lexema, tipotmp, listatmp);}
               | DECL_MULTIPLE ASIGNACION COMA       {  }
-              | ID COMA                             {insertarIdentificador($1.lexema, tipotmp); }
+              | ID COMA                             {insertarIdentificador($1.lexema, tipotmp, listatmp); }
               | ASIGNACION COMA                     {  }
 ;
 
@@ -322,10 +323,10 @@ TIPO_DATO : TIPO_BASICO     {$$.tipo = $1.tipo; $$.lista = $1.lista;}
           | TIPO_COMPLEJO   {$$.tipo = $1.tipo; $$.lista = $1.lista;}
 ;
 
-TIPO_BASICO : TIPO_VAR {tipotmp=$$.tipo = $1.tipo; $$.lista = 0;}
+TIPO_BASICO : TIPO_VAR {tipotmp=$$.tipo = $1.tipo; $$.lista = listatmp = 0;}
 ;
 
-TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR {tipotmp= $$.tipo = $1.tipo; $$.lista = 1;}
+TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR {tipotmp= $$.tipo = $1.tipo; $$.lista = listatmp = 1;}
 ;
 
 ASIGNACION : ID OP_ASIGNACION EXPRESION     {
@@ -336,7 +337,7 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                         $$.tipo = $1.tipo;
                                                     }
                                                 }else{//no existe aun, estamos en la declaracion
-                                                    insertarIdentificador($1.lexema, tipotmp);
+                                                    insertarIdentificador($1.lexema, tipotmp, listatmp);
                                                 }
                                                 if($1.tipo != $3.tipo && $1.lista != $3.lista){
                                                     printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
@@ -350,7 +351,7 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                         $$.tipo = $1.tipo;
                                                     }
                                                 }else{//no existe aun, estamos en la declaracion
-                                                    insertarIdentificador($1.lexema, tipotmp);
+                                                    insertarIdentificador($1.lexema, tipotmp, listatmp);
                                                 }
                                                 if($1.tipo != $3.tipo && $1.lista != $3.lista){
                                                     printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
@@ -364,14 +365,14 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                         $$.tipo = $1.tipo;
                                                     }
                                                 }else{//no existe aun, estamos en la declaracion
-                                                    insertarIdentificador($1.lexema, tipotmp);
-                                                }
-                                                if($1.tipo != $3.tipo){
-                                                    printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
-                                                }
-						if($1.lista != 1){
+                                                    insertarIdentificador($1.lexema, tipotmp, listatmp);
+						    if($1.tipo != $3.tipo){
+                                                    	printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
+                                                    }
+						    if($1.lista != 1){
 							printf("Error en linea %d: Asignacion de agregado a variable simple. %d  %d\n",yylineno,$1.tipo , $3.tipo);
-						}
+						    }
+                                                }
                                             }
            | ID error EXPRESION {yyerrok;}
            | ID error ASIGNACION {yyerrok;}
@@ -418,14 +419,14 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                 }
           | EXPRESION OP_MULT_ARITMETICA error                  {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_LIST_ARITMETICA EXPRESION              {   
-                                                                    if($1.tipo == $3.tipo && $1.lista = 1 && $3.lista == 1 && $2.atributo == 0){
+                                                                    if($1.tipo == $3.tipo && $1.lista == 1 && $3.lista == 1 && $2.atributo == 0){
                                                                         $$.tipo = $1.tipo;
 									$$.lista = $1.lista;
                                                                     }else{
                                                                         printf("Error en linea %d: Operacion de tipos incompatibles en operador '**' \n",yylineno);
                                                                     }
 
-								    if($3.tipo == entero && $1.lista = 1 && $3.lista == 0 && $2.atributo == 1){
+								    if($3.tipo == entero && $1.lista == 1 && $3.lista == 0 && $2.atributo == 1){
                                                                         $$.tipo = $1.tipo;
 									$$.lista = 0;
                                                                     }else{

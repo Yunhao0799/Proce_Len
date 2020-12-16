@@ -48,9 +48,9 @@ COMENTARIO_UNA_LINEA ("//".*"\n")
 "no"                    {yylval.tipo = 0; return NEGACION;}
 "!"                     {yylval.tipo = 1; return NEGACION;}
 
-"--"                    return OP_DECREMENTO;
+"--"                    {strcpy(yylval.lexema, yytext); return OP_DECREMENTO;}
 "-"                     return OP_ADD_MI_ARITMETICA;
-"++"                    return OP_INCREMENTO;
+"++"                    {strcpy(yylval.lexema, yytext); return OP_INCREMENTO;}
 "+"                     return OP_ADD_PL_ARITMETICA;
 "**"                    {yylval.tipo = 0; return OP_LIST_ARITMETICA;}
 "*"                     {yylval.tipo = 0; return OP_MULT_ARITMETICA;}
