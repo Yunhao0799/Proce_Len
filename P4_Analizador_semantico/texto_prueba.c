@@ -24,6 +24,7 @@ principal(){
         var1 = 2;
     sino{
         var1 = var1 * 2;
+        numero ++;
         
     }   
 

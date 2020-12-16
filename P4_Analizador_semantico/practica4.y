@@ -105,6 +105,7 @@ int comprobarExistencia(atributos* nuevo){
 	while(aux >=0){
 		if(strcmp(TS[aux].nombre,(*nuevo).lexema) == 0){
             (*nuevo).tipo=TS[aux].tipoDato;
+	    (*nuevo).lista=TS[aux].esLista;
 			return 0;
 		}else{
 			aux --;
@@ -250,10 +251,10 @@ DECL_VAR_LOCALES : VAR_LOCAL
                  | CONSTANTE VAR_LOCAL
 ;
 
-VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA           {insertarIdentificador($3.lexema, $1.tipo,$1.lista);tipotmp=-1;}
-          | TIPO_DATO ID PUNTOYCOMA                         {insertarIdentificador($2.lexema, $1.tipo, $1.lista);tipotmp=-1;}
-          | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA   {tipotmp=-1;}
-          | TIPO_DATO ASIGNACION PUNTOYCOMA                 {tipotmp=-1;}
+VAR_LOCAL : TIPO_DATO DECL_MULTIPLE ID PUNTOYCOMA           {insertarIdentificador($3.lexema, $1.tipo,$1.lista);tipotmp=-1;listatmp=-1;}
+          | TIPO_DATO ID PUNTOYCOMA                         {insertarIdentificador($2.lexema, $1.tipo, $1.lista);tipotmp=-1;listatmp=-1;}
+          | TIPO_DATO DECL_MULTIPLE ASIGNACION PUNTOYCOMA   {tipotmp=-1; listatmp=-1;}
+          | TIPO_DATO ASIGNACION PUNTOYCOMA                 {tipotmp=-1; listatmp=-1;}
 ;
 
 DECL_MULTIPLE : DECL_MULTIPLE ID COMA               {insertarIdentificador($2.lexema, tipotmp, listatmp);}
@@ -269,8 +270,8 @@ SENTENCIAS : BUCLE_FOR
            | SENTENCIA_ENTRADA PUNTOYCOMA
            | SENTENCIA_SALIDA PUNTOYCOMA
            | EXPRESION PUNTOYCOMA
-           | SENTENCIA_LIST ID PUNTOYCOMA
-           | ID SENTENCIA_LIST PUNTOYCOMA
+           | SENTENCIA_LIST ID PUNTOYCOMA {if(comprobarExistencia(&$2) == 1){printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);}else{if($2.lista != 1)printf("Error en linea %d: Uso de sentencias en variables simples.\n",yylineno);}}
+           | ID SENTENCIA_LIST PUNTOYCOMA {if(comprobarExistencia(&$1) == 1){printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);}else{if($1.lista != 1)printf("Error en linea %d: Uso de sentencias en variables simples.\n",yylineno);}}
            | PROCEDIMIENTO PUNTOYCOMA
 ;
 
@@ -479,7 +480,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                     if(comprobarExistencia(&$2) == 1){
                                                                         printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
                                                                     }else{
-									if(((strcmp($1.lexema,(char*)('?')) == 0) || (strcmp($1.lexema,(char*)('#')) == 0)) && $2.lista == 1){
+									if(((strcmp($1.lexema,"?") == 0) || (strcmp($1.lexema,"#") == 0)) && $2.lista == 1){
                                                                         	$$.tipo = $2.tipo;
 										$$.lista = 0;
 									}else{
@@ -491,7 +492,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                     if(comprobarExistencia(&$1) == 1){
                                                                         printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
                                                                     }else{
-									if(((strcmp($1.lexema,(char*)('?')) == 0) || (strcmp($1.lexema,(char*)('#')) == 0)))
+									if(((strcmp($1.lexema,"?") == 0) || (strcmp($1.lexema,"#") == 0)))
 										printf("Error en linea %d: Uso incorrecto de operador '%s'.\n",yylineno, $1.lexema);
 									else{
                                                                         	$$.tipo = $1.tipo;
@@ -515,7 +516,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                     }else{
 									if($1.lista == 1 && $3.tipo == entero && $3.lista == 0){
                                                                         	$$.tipo = $1.tipo;
-										$$.lista = $1.lista;
+										$$.lista = 0;
 									}else
 										printf("Error en linea %d: Operacion de tipos incompatibles en '--'. Requiere lista y entero. \n",yylineno);
                                                                     }
@@ -579,7 +580,9 @@ AGREGADOS : EXPRESION COMA AGREGADOS {if($1.tipo != $3.tipo){printf("Error en li
           | EXPRESION {if($1.lista == 1){printf("Error en linea %d: No se pueden emplear listas en los agregados.\n",yylineno);}else{$$.tipo = $1.tipo;}}
 ;
 
-OP_UNARIO : OP_INCREMENTO | OP_LIST_UNARIO | OP_DECREMENTO {strcpy($$.lexema, $1.lexema);}
+OP_UNARIO : OP_INCREMENTO {strcpy($$.lexema, $1.lexema);} 
+	| OP_LIST_UNARIO {strcpy($$.lexema, $1.lexema);} 
+	| OP_DECREMENTO {strcpy($$.lexema, $1.lexema);}
 ;
 
 NUMERO : REAL {$$.tipo = real;}
