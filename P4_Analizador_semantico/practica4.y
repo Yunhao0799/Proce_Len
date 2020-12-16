@@ -420,19 +420,21 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                 }
           | EXPRESION OP_MULT_ARITMETICA error                  {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_LIST_ARITMETICA EXPRESION              {   
-                                                                    if($1.tipo == $3.tipo && $1.lista == 1 && $3.lista == 1 && $2.atributo == 0){
-                                                                        $$.tipo = $1.tipo;
-									$$.lista = $1.lista;
-                                                                    }else{
-                                                                        printf("Error en linea %d: Operacion de tipos incompatibles en operador '**' \n",yylineno);
-                                                                    }
-
-								    if($3.tipo == entero && $1.lista == 1 && $3.lista == 0 && $2.atributo == 1){
-                                                                        $$.tipo = $1.tipo;
-									$$.lista = 0;
-                                                                    }else{
-                                                                        printf("Error en linea %d: Operacion de tipos incompatibles en operador '@' \n",yylineno);
-                                                                    }
+								    if($2.atributo == 0){
+                                                                    	if($1.tipo == $3.tipo && $1.lista == 1 && $3.lista == 1 ){
+                                                                        	$$.tipo = $1.tipo;
+										$$.lista = $1.lista;
+                                                                    	}else{
+                                                                        	printf("Error en linea %d: Operacion de tipos incompatibles en operador '**' \n",yylineno);
+                                                                    	}
+								    }else{
+									if($3.tipo == entero && $3.lista == 0 && $1.lista == 1){
+                                                                        	$$.tipo = $1.tipo;
+										$$.lista = 1;
+                                                                    	}else{
+                                                                        	printf("Error en linea %d: Operacion de tipos incompatibles en operador '@' \n",yylineno);
+                                                                    	}
+								    }
                                                                 }
           | EXPRESION OP_LIST_ARITMETICA error                  {printf(", expected: 'EXPRESION'\n"); yyerrok;}
           | EXPRESION OP_AND_LOGICO EXPRESION                   {
@@ -516,7 +518,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                     }else{
 									if($1.lista == 1 && $3.tipo == entero && $3.lista == 0){
                                                                         	$$.tipo = $1.tipo;
-										$$.lista = 0;
+										$$.lista = $1.lista;
 									}else
 										printf("Error en linea %d: Operacion de tipos incompatibles en '--'. Requiere lista y entero. \n",yylineno);
                                                                     }
