@@ -12,6 +12,7 @@ principal(){
     procedimiento(entero numero1, entero numero22){
         real nada;
         entero otro, var2;
+        //entero numero1; //esto da error semantico: redefinicion de variable
         si (1==1)entonces {
 
         }
@@ -39,6 +40,9 @@ principal(){
 
     lista de bool lista1 = [bit];
     lista de real lista2 = [2.3,5.1], lista3 = [1.0];
+    lista de real lista4;
+
+    lista4 = [2.3,5.6];
     lista2 = lista2 ** lista3;
     lista2 = lista2 -- 5;
     

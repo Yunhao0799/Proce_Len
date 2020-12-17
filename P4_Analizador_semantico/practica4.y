@@ -137,7 +137,6 @@ void ComprobarNArgs(char* item, int n_args){
 //inserta los identificadores que hay en el buffer temporal en el vector TS
 //estos identificadores son parametros de algun procedimiento
 void verificarParametros(){
-
     while(topeBuffer > 0){
         comprobarDeclarados(buffer[topeBuffer-1].nombre, 1);
         TS[TOPE].entrada = buffer[topeBuffer-1].entrada;
@@ -179,11 +178,8 @@ void insertarProcedimiento(char* id, int nparams){
     strcpy(TS[TOPE].nombre, id);
     TS[TOPE].parametros = nparams;
     TOPE ++;
-
-    //si el numero de parametros es mayor que 0 debemos insertar tambien los parametros que estan en el buffer temporal
-    if (nparams>0){
-        verificarParametros();
-    }
+    
+    //mostrarTabla();
 }
 
 
@@ -235,7 +231,7 @@ CAB_PROGRAMA : PRINCIPAL INI_PARENTESIS FIN_PARENTESIS
              | PRINCIPAL INI_PARENTESIS error {yyerrok;}
 ;
 
-BLOQUE : INI_BLOQUE {insertarMarca(0);}
+BLOQUE : INI_BLOQUE {insertarMarca(0); verificarParametros();}
          OPCIONES 
          FIN_BLOQUE {vaciarEntradas();}
        | error OPCIONES FIN_BLOQUE {yyerrok;}
@@ -251,7 +247,7 @@ OPCIONES : OPCIONES DECL_VAR_LOCALES
 DECL_PROCEDIMIENTO : CAB_PROCEDIMIENTO BLOQUE;
 
 
-CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS  {insertarProcedimiento($1.lexema, n_parametros); n_parametros=0;}
+CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS  {insertarProcedimiento($1.lexema, n_parametros); n_parametros=0; tipotmp=listatmp=-1;}
                   | ID INI_PARENTESIS FIN_PARENTESIS            {insertarProcedimiento($1.lexema, 0);}
                   | ID error PARAMETRO FIN_PARENTESIS           {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
                   | ID error FIN_PARENTESIS                     {printf(", expected: 'INI_PARENTESIS'\n"); yyerrok;}
@@ -405,12 +401,12 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                     insertarIdentificador($1.lexema, tipotmp, listatmp);
                                                     $1.tipo=tipotmp;
                                                     $1.lista=listatmp;
-                            if($1.tipo != $3.tipo){
+                                                    if($1.tipo != $3.tipo){
                                                         printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
                                                     }
-                            if($1.lista != 1){
-                            printf("Error en linea %d: Asignacion de agregado a variable simple. %d  %d\n",yylineno,$1.tipo , $3.tipo);
-                            }
+                                                    if($1.lista != 1){
+                                                        printf("Error en linea %d: Asignacion de agregado a variable simple. %d  %d\n",yylineno,$1.tipo , $3.tipo);
+                                                    }
                                                 }
                                             }
         | ID error EXPRESION {yyerrok;}
@@ -468,11 +464,11 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                         
                                                                     //operador @, devuelve el valor en la posicion X
                                                                     }else{
-                                                                    if($3.tipo == entero && $3.lista == 0 && $1.lista == 1){
-                                                                        $$.lista = 0;
-                                                                                                        }else{
-                                                                                                            printf("Error en linea %d: Operacion de tipos incompatibles en operador '@'. El primer elemento debe ser una lista y el segundo un entero (posicion).\n",yylineno);
-                                                                                                        }
+                                                                        if($3.tipo == entero && $3.lista == 0 && $1.lista == 1){
+                                                                            $$.lista = 0;
+                                                                        }else{
+                                                                            printf("Error en linea %d: Operacion de tipos incompatibles en operador '@'. El primer elemento debe ser una lista y el segundo un entero (posicion).\n",yylineno);
+                                                                        }
                                                                     }
 
                                                                     //esto es comun a ambos casos
@@ -525,7 +521,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                         printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
                                                                     }else{
                                                                         if(((strcmp($1.lexema,"?") == 0) || (strcmp($1.lexema,"#") == 0)) && $2.lista == 1){
-                                                                                                                $$.tipo = $2.tipo;
+                                                                            $$.tipo = $2.tipo;
                                                                             $$.lista = 0;
                                                                         }else{
                                                                             printf("Error en linea %d: Uso incorrecto de operador '%s'.\n",yylineno, $1.lexema);
