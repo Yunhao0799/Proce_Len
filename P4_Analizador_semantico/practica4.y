@@ -10,6 +10,7 @@
 
 /* Inicio definicion de la tabla de simbolos */
 
+//enumerado para indicar los tipos de elementos en la tabla de simbolos
 typedef enum{
     marca,
     procedimiento,
@@ -17,6 +18,7 @@ typedef enum{
     parametro_formal
 } tipoEntrada;
 
+//enumerado con los tipos de datos que acepta el lenguaje, + desconocido
 typedef enum{
     bool,
     caracter,
@@ -25,29 +27,38 @@ typedef enum{
     desconocido
 } dTipo;
 
+//struct con los atributos que tendra cada elemento de la tabla de simbolos (algunos no se usaran segun el tipo de entrada)
 typedef struct{
     tipoEntrada entrada;
     char nombre[100];
     dTipo tipoDato;
     int esLista;
+
+    //solo para procedimientos
     unsigned int parametros;
+    int tipoParametros[10];
 } entradaTS;
 
+//variables temporales para poder crear los parametros antes de introducirlos en la tabla de simbolos
 int tipotmp = -1, listatmp = 0;
-unsigned int flag=0;
+unsigned int parametroBucleFor=0;
 unsigned int n_parametros;
-unsigned int n_argumentos;
 
-#define MAX_TS 500
-
-unsigned int TOPE = 0;
-unsigned int Subprog;
-
-entradaTS TS[MAX_TS];
-
+//buffer temporal donde se crean los parametros antes de introducirlos en la tabla de simbolos
 int topeBuffer=0;
 entradaTS buffer[10];
 
+//variables temporales para poder verificar el tipo de los argumentos pasados a una llamada a procedimiento
+unsigned int n_argumentos;
+unsigned int tiposArgstmp[10];
+
+//variables para la tabla de simbolos (y la propia tabla)
+#define MAX_TS 500
+
+unsigned int TOPE = 0;
+entradaTS TS[MAX_TS];
+
+//struct que indica los atributos que tiene cada token de las producciones (inicialmente no tienen valor)
 typedef struct{
     int atributo;
     char lexema[100];
@@ -62,8 +73,8 @@ typedef struct{
 
 /* Inicio definicion funciones */
 
+//muestra todos los elementos que hay en la tabla de simbolos en el momento de la llamada
 void mostrarTabla(){
-
     for(int i = 0; i  < TOPE; i ++){
         printf("indice:%d \t-->  ", i);
         if(TS[i].entrada == marca){
@@ -77,11 +88,13 @@ void mostrarTabla(){
     printf("------------------------------------------------\n");
 }
 
+//inserta en la tabla de simbolos una marca
 void insertarMarca(){    
     TS[TOPE].entrada = marca;
     TOPE ++;
 }
 
+//'elimina' todos los elementos de la tabla de simbolos hasta la 1a marca encontrada
 void vaciarEntradas(){
     do{
         TOPE --;
@@ -90,6 +103,7 @@ void vaciarEntradas(){
 
 //comprueba si un identificador ya esta declarado o no
 // esta se usa para cuando estamos declarando variables, si declaras 2 veces la segunda no es valida
+//**si que permite declarar un parametro de un procedimiento con el mismo nombre que una variable anterior
 void comprobarDeclarados(char* nuevo, int modoParametros){
     unsigned int aux = TOPE-1;
 
@@ -104,7 +118,7 @@ void comprobarDeclarados(char* nuevo, int modoParametros){
     }
 }
 
-//comprueba si un identificador (para variable o procedimiento) ya existe (a sido declarado previamente) o no
+//comprueba si un identificador (para variable, procedimiento o argumento de procedimiento) ya existe (a sido declarado previamente) o no
 //esta se usa para cuando el ID se esta utilizando en una operacion
 int comprobarExistencia(atributos* nuevo){
     int aux = TOPE-1;
@@ -128,6 +142,11 @@ void ComprobarNArgs(char* item, int n_args){
         if(strcmp(TS[aux].nombre, item) == 0){
             if(TS[aux].parametros != n_args)
                 printf("En linea %d: Numero de argumentos erroneo, se esperaban %d y se encontraron %d.\n", yylineno, TS[aux].parametros, n_args);
+
+            for(int i=0; i< n_argumentos; i++){
+                if(tiposArgstmp[i]!=TS[aux].tipoParametros[i])
+                    printf("En linea %d: El tipo del parametro %d es incorrecto, se esperaba el tipo %d y se ha encontrado el tipo %d.\n", yylineno, i, TS[aux].tipoParametros[i], tiposArgstmp[i]);
+            }
             return;
         }else
             aux --;
@@ -135,14 +154,32 @@ void ComprobarNArgs(char* item, int n_args){
 }
 
 //inserta los identificadores que hay en el buffer temporal en el vector TS
-//estos identificadores son parametros de algun procedimiento
+//estos identificadores son parametros de algun procedimiento o la variable de control de un bucle for
 void verificarParametros(){
+
+    //buscamos el procedimiento al que corresponden estos parametros 
+    int indiceProcedimiento=0;
+    if(topeBuffer>0 && parametroBucleFor==0){
+        //en teoria, si nada ha ido mal, el elemento en tope-1 es una marca y el elemento en tope-2 es el procedimiento
+        if(TS[TOPE-2].entrada == procedimiento)
+            indiceProcedimiento=TOPE-2;
+        else{
+            printf("ERROR INTERNO");
+            exit(-1);
+        }
+    }
+
     while(topeBuffer > 0){
         comprobarDeclarados(buffer[topeBuffer-1].nombre, 1);
         TS[TOPE].entrada = buffer[topeBuffer-1].entrada;
         strcpy(TS[TOPE].nombre, buffer[topeBuffer-1].nombre);
         TS[TOPE].tipoDato = buffer[topeBuffer-1].tipoDato;
         TS[TOPE].esLista = buffer[topeBuffer].esLista;
+
+        //si estamos introduciendo los parametros de un procedimiento añadimos el tipo de dato en el vector correspondiente
+        if(parametroBucleFor==0){
+            TS[indiceProcedimiento].tipoParametros[topeBuffer-1] = TS[TOPE].tipoDato;
+        }
 
         TOPE ++;
         topeBuffer--;
@@ -162,6 +199,7 @@ void insertarIdentificador(char* id, unsigned int atributo, int lista){
 
 // para insertar identificadores de parametros en el buffer temporal (mas tarde se insertan en el vector TS)
 //** esto es necesario pues primero se resuelve la produccion de los parametros y despues la del procedimiento **
+//*tambien se usa para la varible de control de los bucles for
 void insertarParametro(char* id, unsigned int atributo, int lista){
     buffer[topeBuffer].entrada = variable;
     strcpy(buffer[topeBuffer].nombre, id);
@@ -255,8 +293,15 @@ CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS  {insertarProcedi
                   | ID INI_PARENTESIS error                     {printf(", expected: 'FIN_PARENTESIS'\n"); yyerrok;}
 ;
 
-PARAMETRO : PARAMETRO COMA TIPO_DATO ID {n_parametros++;insertarParametro($4.lexema, $3.tipo, $3.lista);}
-          | TIPO_DATO ID                {n_parametros++;insertarParametro($2.lexema, $1.tipo, $1.lista);}
+PARAMETRO : PARAMETRO COMA TIPO_DATO ID {
+                                            n_parametros++;
+                                            if(n_parametros>=10){
+                                                printf("Error en linea %d: Demasiados parametros en el procedimiento.\n",yylineno);
+                                                exit(-1);
+                                            }
+                                            insertarParametro($4.lexema, $3.tipo, $3.lista);
+                                        }
+          | TIPO_DATO ID                {n_parametros=1; insertarParametro($2.lexema, $1.tipo, $1.lista);}
 ;
 
 DECL_VAR_LOCALES : VAR_LOCAL
@@ -309,30 +354,30 @@ SENTENCIA_ENTRADA : ENTRADA INI_PARENTESIS LISTA_VAR FIN_PARENTESIS
                 | ENTRADA INI_PARENTESIS error error {yyerrok;}
 ;
 
-SENTENCIA_SALIDA : SALIDA INI_PARENTESIS LIST_ESXP_O_CAD FIN_PARENTESIS 
-                | SALIDA error LIST_ESXP_O_CAD FIN_PARENTESIS {yyerrok;}
-                | SALIDA INI_PARENTESIS LIST_ESXP_O_CAD error {yyerrok;}
+SENTENCIA_SALIDA : SALIDA INI_PARENTESIS LIST_EXP_O_CAD FIN_PARENTESIS 
+                | SALIDA error LIST_EXP_O_CAD FIN_PARENTESIS {yyerrok;}
+                | SALIDA INI_PARENTESIS LIST_EXP_O_CAD error {yyerrok;}
 ;
 
 LISTA_VAR : LISTA_VAR COMA ID
           | ID
 ;
 
-LIST_ESXP_O_CAD : LIST_ESXP_O_CAD COMA EXPRESION
-                | LIST_ESXP_O_CAD COMA COMILLAS CADENA COMILLAS
+LIST_EXP_O_CAD : LIST_EXP_O_CAD COMA EXPRESION
+                | LIST_EXP_O_CAD COMA COMILLAS CADENA COMILLAS
                 | EXPRESION
                 | COMILLAS CADENA COMILLAS
 ;
 
-CANTIDAD_CODIGO : BLOQUE        {verificarParametros();} //por si antes habia un bucle for para insertar la variable de control (tipica i/j/k/contador)
-                | SENTENCIAS    {verificarParametros();} //por si antes habia un bucle for para insertar la variable de control (tipica i/j/k/contador)
+CANTIDAD_CODIGO : BLOQUE        {verificarParametros();parametroBucleFor=0;} //por si antes habia un bucle for para insertar la variable de control (tipica i/j/k/contador)
+                | SENTENCIAS    {verificarParametros();parametroBucleFor=0;} //por si antes habia un bucle for para insertar la variable de control (tipica i/j/k/contador)
 ;
 
 CADENA : CADENA ID
        | ID
 ;
 
-BUCLE_FOR : BUCLE_PARA ID {insertarParametro($2.lexema, entero, 0);} OP_ASIGNACION NUMERO MODO_FOR NUMERO FINPARA CANTIDAD_CODIGO;
+BUCLE_FOR : BUCLE_PARA ID {parametroBucleFor=1;insertarParametro($2.lexema, entero, 0);} OP_ASIGNACION NUMERO MODO_FOR NUMERO FINPARA CANTIDAD_CODIGO;
 
 SENTENCIA_SI : BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS
                 ENTONCES CANTIDAD_CODIGO
@@ -374,7 +419,7 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                     printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
                                                 }
                                             }
-        | ID OP_ASIGNACION ASIGNACION    {
+           | ID OP_ASIGNACION ASIGNACION    {
                                                 if (tipotmp == -1){//buscamos el elemento
                                                     if(comprobarExistencia(&$1) == 1){
                                                         printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
@@ -390,7 +435,7 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                     printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
                                                 }
                                             }
-        | ID OP_ASIGNACION EST_AGREGADO  {
+           | ID OP_ASIGNACION EST_AGREGADO  {
                                                 if (tipotmp == -1){//buscamos el elemento
                                                     if(comprobarExistencia(&$1) == 1){
                                                         printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
@@ -409,9 +454,9 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                     }
                                                 }
                                             }
-        | ID error EXPRESION {yyerrok;}
-        | ID error ASIGNACION {yyerrok;}
-        | ID error EST_AGREGADO {yyerrok;}
+           | ID error EXPRESION {yyerrok;}
+           | ID error ASIGNACION {yyerrok;}
+           | ID error EST_AGREGADO {yyerrok;}
 ;
 
 EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
@@ -561,7 +606,6 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                             printf("Error en linea %d: Operacion de tipos incompatibles en '--'. Requiere lista y entero. \n",yylineno);
                                                                     }
                                                                 }
-
           | ID OP_INCREMENTO EXPRESION OP_LIST_ARITMETICA EXPRESION    {
                                                                     if(comprobarExistencia(&$1) == 1){
                                                                         printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
@@ -573,7 +617,6 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                             printf("Error en linea %d: incorrecto de operador ternario.\n",yylineno);
                                                                     }
                                                                 }
-
           | INI_PARENTESIS EXPRESION FIN_PARENTESIS             {$$.tipo = $2.tipo; $$.lista = $2.lista;}
           | INI_PARENTESIS EXPRESION error {yyerrok;}
           | NUMERO {$$.tipo = $1.tipo;}
@@ -592,28 +635,46 @@ PROCEDIMIENTO : ID INI_PARENTESIS ARGUMENTOS FIN_PARENTESIS     {
                                                                     if(comprobarExistencia(&$1) == 1){
                                                                         printf("Error en linea %d: Procedimiento '%s' no definido.\n",yylineno, $1.lexema);
                                                                     }else{
-                                                                        ComprobarNArgs($1.lexema, n_argumentos);
+                                                                        ComprobarNArgs($1.lexema, n_argumentos); n_argumentos=0;
                                                                     }
                                                                 }
-            | ID INI_PARENTESIS FIN_PARENTESIS                {
+              | ID INI_PARENTESIS FIN_PARENTESIS                {
                                                                     if(comprobarExistencia(&$1) == 1){
                                                                         printf("Error en linea %d: Procedimiento '%s' no definido.\n",yylineno, $1.lexema);
                                                                     }else{
                                                                         ComprobarNArgs($1.lexema, 0);
                                                                     }
                                                                 }
-            | ID INI_PARENTESIS ARGUMENTOS error {yyerrok;}
-            | ID INI_PARENTESIS error {yyerrok;}
+              | ID INI_PARENTESIS ARGUMENTOS error {yyerrok;}
+              | ID INI_PARENTESIS error {yyerrok;}
 ;
 
-ARGUMENTOS : ARGUMENTOS COMA ID     {n_argumentos++;}
-        | ID                      {n_argumentos=1;}
+ARGUMENTOS : ARGUMENTOS COMA ID     {
+                                        if(comprobarExistencia(&$3) == 1){
+                                            printf("Error en linea %d: Procedimiento '%s' no definido.\n",yylineno, $1.lexema);
+                                        }else{
+                                            tiposArgstmp[n_argumentos]=$3.tipo;
+                                        }
+                                        n_argumentos++;
+
+                                        if(n_argumentos>=10){
+                                            printf("Error en linea %d: Demasiados argumentos en el procedimiento.\n",yylineno);
+                                            exit(-1);
+                                        }
+                                    }
+           | ID                     {
+                                        if(comprobarExistencia(&$1) == 1){
+                                            printf("Error en linea %d: Procedimiento '%s' no definido.\n",yylineno, $1.lexema);
+                                        }else{
+                                            tiposArgstmp[0]=$1.tipo;
+                                        }
+                                        n_argumentos=1;}
 ;
 
 EST_AGREGADO : INI_AGREGADO AGREGADOS FIN_AGREGADO {$$.tipo = $2.tipo;}
-            | error AGREGADOS FIN_PARENTESIS {yyerrok;}
-            | INI_AGREGADO FIN_AGREGADO
-            | error FIN_AGREGADO {yyerrok;}
+             | error AGREGADOS FIN_PARENTESIS {yyerrok;}
+             | INI_AGREGADO FIN_AGREGADO
+             | error FIN_AGREGADO {yyerrok;}
 ;
 
 AGREGADOS : AGREGADOS COMA EXPRESION    {
@@ -623,7 +684,7 @@ AGREGADOS : AGREGADOS COMA EXPRESION    {
                                                     $$.tipo = $1.tipo;
                                             }
                                         }
-        | EXPRESION                     {
+          | EXPRESION                   {
                                             if($1.lista == 1){
                                                 printf("Error en linea %d: No se pueden emplear listas en los agregados.\n",yylineno);
                                             }else{
@@ -633,16 +694,16 @@ AGREGADOS : AGREGADOS COMA EXPRESION    {
 ;
 
 OP_UNARIO : OP_INCREMENTO {strcpy($$.lexema, $1.lexema);} 
-    | OP_LIST_UNARIO {strcpy($$.lexema, $1.lexema);} 
-    | OP_DECREMENTO {strcpy($$.lexema, $1.lexema);}
+          | OP_LIST_UNARIO {strcpy($$.lexema, $1.lexema);} 
+          | OP_DECREMENTO {strcpy($$.lexema, $1.lexema);}
 ;
 
 NUMERO : REAL {$$.tipo = real;}
-    | ENTERO{$$.tipo = entero;}
+       | ENTERO{$$.tipo = entero;}
 ;
 
 LOGICO : TRUE {$$.tipo = bool;}
-    | FALSE {$$.tipo = bool;}
+       | FALSE {$$.tipo = bool;}
 ;
 /* Fin reglas gramaticales */
 
