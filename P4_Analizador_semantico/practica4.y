@@ -415,7 +415,7 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                     $1.tipo=tipotmp;
                                                     $1.lista=listatmp;
                                                 }
-                                                if($1.tipo != $3.tipo && $1.lista != $3.lista){
+                                                if($1.tipo != $3.tipo || $1.lista != $3.lista){
                                                     printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
                                                 }
                                             }
