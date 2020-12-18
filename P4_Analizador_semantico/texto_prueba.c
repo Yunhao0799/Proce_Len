@@ -48,6 +48,10 @@ principal(){
     
     lista3 @ 7;
 
+    lista2 = lista2 ++ 2.3 @ 5;
+    lista2 = lista2 ++ (var1++) @ 3;
+    lista4 = lista2 ++ (lista3 @ 2) @ 4;
+
     $lista2;
     lista2 >>;
 }

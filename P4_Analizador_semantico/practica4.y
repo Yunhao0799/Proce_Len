@@ -606,11 +606,11 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                             printf("Error en linea %d: Operacion de tipos incompatibles en '--'. Requiere lista y entero. \n",yylineno);
                                                                     }
                                                                 }
-          | ID OP_INCREMENTO EXPRESION OP_LIST_ARITMETICA EXPRESION    {
+          | ID OP_INCREMENTO VALOR OP_LIST_ARITMETICA EXPRESION    {
                                                                     if(comprobarExistencia(&$1) == 1){
                                                                         printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
                                                                     }else{
-                                                                        if($1.lista == 1 && $3.tipo == $1.tipo && $3.lista == 0 && $4.tipo == 1 && $5.tipo == entero && $5.lista == 0){
+                                                                        if($1.lista == 1 && $4.tipo == 1 && $5.tipo == entero && $5.lista == 0){
                                                                             $$.tipo = $1.tipo;
                                                                             $$.lista = $1.lista;
                                                                         }else
@@ -629,6 +629,130 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                         $$.lista = $1.lista;
                                                                     }
                                                                 }
+;
+
+VALOR : VALOR OP_ADD_MI_ARITMETICA VALOR            {
+                                                        if($1.tipo == $3.tipo && ($1.lista == 0 || $3.lista == 0)){
+                                                            $$.tipo = $1.tipo;
+                                                            if($1.lista == 1)
+                                                               $$.lista = $1.lista;
+                                                            else
+                                                                $$.lista = $3.lista;
+                                                                            
+                                                        }else{
+                                                            printf("Error en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                        }
+                                                    }
+      | VALOR OP_ADD_MI_ARITMETICA error                {printf(", expected: 'EXPRESION'\n"); yyerrok;}
+      | VALOR OP_ADD_PL_ARITMETICA VALOR            {
+                                                        if($1.tipo == $3.tipo && ($1.lista == 0 || $3.lista == 0)){
+                                                            $$.tipo = $1.tipo;
+                                                            if($1.lista == 1)
+                                                                $$.lista = $1.lista;
+                                                            else
+                                                                $$.lista = $3.lista;
+                                
+                                                            }else{
+                                                                printf("Error en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                            }
+                                                    }
+      | VALOR OP_ADD_PL_ARITMETICA error                {printf(", expected: 'EXPRESION'\n"); yyerrok;}
+      | VALOR OP_MULT_ARITMETICA VALOR              {
+                                                                    if($1.tipo == $3.tipo && ($1.lista == 0 || $3.lista == 0)){
+                                                                        $$.tipo = $1.tipo;
+                                                                        if($1.lista == 1)
+                                                                            $$.lista = $1.lista;
+                                                                        else
+                                                                            $$.lista = $3.lista;
+                                    
+                                                                    }else{
+                                                                        printf("Error en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                                    }
+                                                                }
+      | VALOR OP_MULT_ARITMETICA error                  {printf(", expected: 'EXPRESION'\n"); yyerrok;}
+      | VALOR OP_AND_LOGICO VALOR                   {
+                                                                    if($1.tipo == bool && $3.tipo == bool){
+                                                                        $$.tipo = bool;
+                                                                    }else{
+                                                                        $$.tipo=desconocido;
+                                                                    }
+                                                                }
+      | VALOR OP_AND_LOGICO error                       {printf(", expected: 'EXPRESION'\n"); yyerrok;}
+      | VALOR OP_OR_LOGICO VALOR                    {
+                                                                    if($1.tipo == bool && $3.tipo == bool){
+                                                                        $$.tipo = bool;
+                                                                    }else{
+                                                                        $$.tipo=desconocido;
+                                                                    }
+                                                                }
+      | VALOR OP_OR_LOGICO error                        {printf(", expected: 'EXPRESION'\n"); yyerrok;}
+      | VALOR OP_EXOR_LOGICO VALOR                  {
+                                                                    if($1.tipo == bool && $3.tipo == bool && $1.lista == 0 && $3.lista == 0){
+                                                                        $$.tipo = bool;
+                                                                        $$.lista = 0;
+                                                                    }else{
+                                                                        $$.tipo=desconocido;
+                                                                    }
+                                                                }
+      | VALOR OP_EXOR_LOGICO error                      {printf(", expected: 'EXPRESION'\n"); yyerrok;}
+      | VALOR OP_IGUALDAD_LOGICO VALOR              {   
+                                                                    if($1.tipo == $3.tipo && $1.lista == 0 && $3.lista == 0){
+                                                                        $$.tipo = bool;
+                                                                        $$.lista = 0;
+                                                                    }else{
+                                                                        $$.tipo=desconocido;
+                                                                    }
+                                                                }
+      | VALOR OP_IGUALDAD_LOGICO error                  {printf(", expected: 'EXPRESION'\n"); yyerrok;}
+      | OP_UNARIO ID                                        {
+                                                                    if(comprobarExistencia(&$2) == 1){
+                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
+                                                                    }else{
+                                                                        if(((strcmp($1.lexema,"?") == 0) || (strcmp($1.lexema,"#") == 0)) && $2.lista == 1){
+                                                                            $$.tipo = $2.tipo;
+                                                                            $$.lista = 0;
+                                                                        }else{
+                                                                            printf("Error en linea %d: Uso incorrecto de operador '%s'.\n",yylineno, $1.lexema);
+                                                                        }
+                                                                    }
+                                                                }
+      | ID OP_UNARIO                                        {
+                                                                    if(comprobarExistencia(&$1) == 1){
+                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                                    }else{
+                                                                        if(((strcmp($1.lexema,"?") == 0) || (strcmp($1.lexema,"#") == 0)))
+                                                                            printf("Error en linea %d: Uso incorrecto de operador '%s'.\n",yylineno, $1.lexema);
+                                                                        else{
+                                                                            $$.tipo = $1.tipo;
+                                                                            $$.lista = 0;
+                                                                        }
+                                                                    }
+                                                                }
+      | OP_ADD_MI_ARITMETICA ID                             {
+                                                                    if(comprobarExistencia(&$2) == 1){
+                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
+                                                                    }else{
+                                                                        $$.tipo = $2.tipo;
+                                                                        $$.lista = $2.lista;
+                                                                    }
+                                                                }
+
+      | OP_ADD_MI_ARITMETICA NUMERO {$$.tipo = $2.tipo;}    
+      | ID OP_DECREMENTO VALOR                          {
+                                                                    if(comprobarExistencia(&$1) == 1){
+                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                                    }else{
+                                                                        if($1.lista == 1 && $3.tipo == entero && $3.lista == 0){
+                                                                            $$.tipo = $1.tipo;
+                                                                            $$.lista = $1.lista;
+                                                                        }else
+                                                                            printf("Error en linea %d: Operacion de tipos incompatibles en '--'. Requiere lista y entero. \n",yylineno);
+                                                                    }
+                                                                }
+      | INI_PARENTESIS VALOR FIN_PARENTESIS
+      | INI_PARENTESIS VALOR error {yyerrok;}
+      | ID OP_LIST_ARITMETICA NUMERO
+      | NUMERO {$$.tipo = $1.tipo;}
 ;
 
 PROCEDIMIENTO : ID INI_PARENTESIS ARGUMENTOS FIN_PARENTESIS     {
