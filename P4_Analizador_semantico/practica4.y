@@ -7,7 +7,7 @@
     int yylex();
     int yylineno;
     void yyerror(const char *s);
-
+    char* error = "\033[1;31mError: \033[0m";
 /* Inicio definicion de la tabla de simbolos */
 
 //enumerado para indicar los tipos de elementos en la tabla de simbolos
@@ -110,7 +110,7 @@ void comprobarDeclarados(char* nuevo, int modoParametros){
     while(TS[aux].entrada != marca){
         if(strcmp(TS[aux].nombre,nuevo) == 0){
             if (modoParametros==0){
-                printf("En linea %d: El identificador de nombre '%s' ya esta definido.\n",yylineno, nuevo);
+                printf("%s en  linea %d: El identificador de nombre '%s' ya esta definido.\n", error, yylineno, nuevo);
                 exit(-1);
             }
         }
@@ -141,11 +141,11 @@ void ComprobarNArgs(char* item, int n_args){
     while(aux >=0){
         if(strcmp(TS[aux].nombre, item) == 0){
             if(TS[aux].parametros != n_args)
-                printf("En linea %d: Numero de argumentos erroneo, se esperaban %d y se encontraron %d.\n", yylineno, TS[aux].parametros, n_args);
+                printf("%s en  linea %d: Numero de argumentos erroneo, se esperaban %d y se encontraron %d.\n", error, yylineno, TS[aux].parametros, n_args);
 
             for(int i=0; i< n_argumentos; i++){
                 if(tiposArgstmp[i]!=TS[aux].tipoParametros[i])
-                    printf("En linea %d: El tipo del parametro %d es incorrecto, se esperaba el tipo %d y se ha encontrado el tipo %d.\n", yylineno, i, TS[aux].tipoParametros[i], tiposArgstmp[i]);
+                    printf("%s en linea %d: El tipo del parametro %d es incorrecto, se esperaba el tipo %d y se ha encontrado el tipo %d.\n", error, yylineno, i, TS[aux].tipoParametros[i], tiposArgstmp[i]);
             }
             return;
         }else
@@ -296,7 +296,7 @@ CAB_PROCEDIMIENTO : ID INI_PARENTESIS PARAMETRO FIN_PARENTESIS  {insertarProcedi
 PARAMETRO : PARAMETRO COMA TIPO_DATO ID {
                                             n_parametros++;
                                             if(n_parametros>=10){
-                                                printf("Error en linea %d: Demasiados parametros en el procedimiento.\n",yylineno);
+                                                printf("%s en linea %d: Demasiados parametros en el procedimiento.\n", error, yylineno);
                                                 exit(-1);
                                             }
                                             insertarParametro($4.lexema, $3.tipo, $3.lista);
@@ -331,18 +331,18 @@ SENTENCIAS : BUCLE_FOR
            | EXPRESION PUNTOYCOMA
            | SENTENCIA_LIST ID PUNTOYCOMA   {
                                                 if(comprobarExistencia(&$2) == 1){
-                                                    printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
+                                                    printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $2.lexema);
                                                 }else{
                                                     if($2.lista != 1)
-                                                        printf("Error en linea %d: Uso de sentencias en variables simples.\n",yylineno);
+                                                        printf("%s en linea %d: Uso de sentencias en variables simples.\n",error,yylineno);
                                                 }
                                             }
            | ID SENTENCIA_LIST PUNTOYCOMA   {
                                                 if(comprobarExistencia(&$1) == 1){
-                                                    printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                    printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                 }else{
                                                     if($1.lista != 1)
-                                                        printf("Error en linea %d: Uso de sentencias en variables simples.\n",yylineno);
+                                                        printf("%s en linea %d: Uso de sentencias en variables simples.\n",error,yylineno);
                                                 }
                                             }
            | PROCEDIMIENTO PUNTOYCOMA
@@ -381,14 +381,14 @@ BUCLE_FOR : BUCLE_PARA ID {parametroBucleFor=1;insertarParametro($2.lexema, ente
 
 SENTENCIA_SI : BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS
                 ENTONCES CANTIDAD_CODIGO
-                SINO CANTIDAD_CODIGO                            {if($3.tipo != bool){printf("En linea %d: Expresión no booleana.\n",yylineno);exit(-1);}}
+                SINO CANTIDAD_CODIGO                            {if($3.tipo != bool){printf("%s en linea %d: Expresión no booleana.\n",error,yylineno);exit(-1);}}
              | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS 
-                ENTONCES CANTIDAD_CODIGO                        {if($3.tipo != bool){printf("En linea %d: Expresión no booleana.\n",yylineno);exit(-1);}}
+                ENTONCES CANTIDAD_CODIGO                        {if($3.tipo != bool){printf("%s en linea %d: Expresión no booleana.\n",error,yylineno);exit(-1);}}
              | BUCLE_SI INI_PARENTESIS EXPRESION FIN_PARENTESIS error CANTIDAD_CODIGO {yyerrok;}
              | BUCLE_SI INI_PARENTESIS error FIN_PARENTESIS ENTONCES CANTIDAD_CODIGO {yyerrok;}
 ;
 
-BUCLE_WHILE : BUCLE_MIENTRAS INI_PARENTESIS EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {if($3.tipo != bool){printf("En linea %d: Expresión no booleana.\n",yylineno);}} 
+BUCLE_WHILE : BUCLE_MIENTRAS INI_PARENTESIS EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {if($3.tipo != bool){printf("%s en linea %d: Expresión no booleana.\n",error,yylineno);}} 
             | BUCLE_MIENTRAS error EXPRESION FIN_PARENTESIS CANTIDAD_CODIGO {yyerrok;}
             | BUCLE_MIENTRAS INI_PARENTESIS EXPRESION error CANTIDAD_CODIGO {yyerrok;}
 ;
@@ -406,7 +406,7 @@ TIPO_COMPLEJO : DECL_LISTAS TIPO_VAR {tipotmp= $$.tipo = $2.tipo; $$.lista = lis
 ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                 if (tipotmp == -1){//buscamos el elemento
                                                     if(comprobarExistencia(&$1) == 1){
-                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                     }else{
                                                         $$.tipo = $1.tipo;
                                                     }
@@ -416,13 +416,13 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                     $1.lista=listatmp;
                                                 }
                                                 if($1.tipo != $3.tipo || $1.lista != $3.lista){
-                                                    printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
+                                                    printf("%s en linea %d: Asignacion de tipos invalida. %d  %d\n",error,yylineno,$1.tipo , $3.tipo);
                                                 }
                                             }
            | ID OP_ASIGNACION ASIGNACION    {
                                                 if (tipotmp == -1){//buscamos el elemento
                                                     if(comprobarExistencia(&$1) == 1){
-                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                     }else{
                                                         $$.tipo = $1.tipo;
                                                     }
@@ -432,13 +432,13 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                     $1.lista=listatmp;
                                                 }
                                                 if($1.tipo != $3.tipo && $1.lista != $3.lista){
-                                                    printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
+                                                    printf("%s en linea %d: Asignacion de tipos invalida. %d  %d\n",error,yylineno,$1.tipo , $3.tipo);
                                                 }
                                             }
            | ID OP_ASIGNACION EST_AGREGADO  {
                                                 if (tipotmp == -1){//buscamos el elemento
                                                     if(comprobarExistencia(&$1) == 1){
-                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                     }else{
                                                         $$.tipo = $1.tipo;
                                                     }
@@ -447,10 +447,10 @@ ASIGNACION : ID OP_ASIGNACION EXPRESION     {
                                                     $1.tipo=tipotmp;
                                                     $1.lista=listatmp;
                                                     if($1.tipo != $3.tipo){
-                                                        printf("Error en linea %d: Asignacion de tipos invalida. %d  %d\n",yylineno,$1.tipo , $3.tipo);
+                                                        printf("%s en linea %d: Asignacion de tipos invalida. %d  %d\n",error,yylineno,$1.tipo , $3.tipo);
                                                     }
                                                     if($1.lista != 1){
-                                                        printf("Error en linea %d: Asignacion de agregado a variable simple. %d  %d\n",yylineno,$1.tipo , $3.tipo);
+                                                        printf("%s en linea %d: Asignacion de agregado a variable simple. %d  %d\n", error,yylineno,$1.tipo , $3.tipo);
                                                     }
                                                 }
                                             }
@@ -468,7 +468,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                             $$.lista = $3.lista;
                                                                             
                                                                     }else{
-                                                                        printf("Error en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                                        printf("%s en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",error,yylineno, $1.tipo, $3.tipo);
                                                                     }
                                                                 }
           | EXPRESION OP_ADD_MI_ARITMETICA error                {printf(", expected: 'EXPRESION'\n"); yyerrok;}
@@ -481,7 +481,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                             $$.lista = $3.lista;
                                     
                                                                     }else{
-                                                                        printf("Error en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                                        printf("%s en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",error,yylineno, $1.tipo, $3.tipo);
                                                                     }
                                                                 }
           | EXPRESION OP_ADD_PL_ARITMETICA error                {printf(", expected: 'EXPRESION'\n"); yyerrok;}
@@ -494,7 +494,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                             $$.lista = $3.lista;
                                     
                                                                     }else{
-                                                                        printf("Error en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                                        printf("%s en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",error,yylineno, $1.tipo, $3.tipo);
                                                                     }
                                                                 }
           | EXPRESION OP_MULT_ARITMETICA error                  {printf(", expected: 'EXPRESION'\n"); yyerrok;}
@@ -504,7 +504,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                         if($1.tipo == $3.tipo && $1.lista == 1 && $3.lista == 1){
                                                                             $$.lista = 1;
                                                                         }else{
-                                                                            printf("Error en linea %d: Operacion de tipos incompatibles en operador '**'. Uno de los dos tipos no es una lista o tienen distinto tipo interno: Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                                            printf("%s en linea %d: Operacion de tipos incompatibles en operador '**'. Uno de los dos tipos no es una lista o tienen distinto tipo interno: Tipos:%d y %d \n",error,yylineno, $1.tipo, $3.tipo);
                                                                         }
                                                                         
                                                                     //operador @, devuelve el valor en la posicion X
@@ -512,7 +512,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                         if($3.tipo == entero && $3.lista == 0 && $1.lista == 1){
                                                                             $$.lista = 0;
                                                                         }else{
-                                                                            printf("Error en linea %d: Operacion de tipos incompatibles en operador '@'. El primer elemento debe ser una lista y el segundo un entero (posicion).\n",yylineno);
+                                                                            printf("%s en linea %d: Operacion de tipos incompatibles en operador '@'. El primer elemento debe ser una lista y el segundo un entero (posicion).\n",error,yylineno);
                                                                         }
                                                                     }
 
@@ -563,22 +563,22 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                 }
           | OP_UNARIO ID                                        {
                                                                     if(comprobarExistencia(&$2) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $2.lexema);
                                                                     }else{
                                                                         if(((strcmp($1.lexema,"?") == 0) || (strcmp($1.lexema,"#") == 0)) && $2.lista == 1){
                                                                             $$.tipo = $2.tipo;
                                                                             $$.lista = 0;
                                                                         }else{
-                                                                            printf("Error en linea %d: Uso incorrecto de operador '%s'.\n",yylineno, $1.lexema);
+                                                                            printf("%s en linea %d: Uso incorrecto de operador '%s'.\n",error,yylineno, $1.lexema);
                                                                         }
                                                                     }
                                                                 }
           | ID OP_UNARIO                                        {
                                                                     if(comprobarExistencia(&$1) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                                     }else{
                                                                         if(((strcmp($1.lexema,"?") == 0) || (strcmp($1.lexema,"#") == 0)))
-                                                                            printf("Error en linea %d: Uso incorrecto de operador '%s'.\n",yylineno, $1.lexema);
+                                                                            printf("%s en linea %d: Uso incorrecto de operador '%s'.\n",error,yylineno, $1.lexema);
                                                                         else{
                                                                             $$.tipo = $1.tipo;
                                                                             $$.lista = 0;
@@ -587,7 +587,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
                                                                 }
           | OP_ADD_MI_ARITMETICA ID                             {
                                                                     if(comprobarExistencia(&$2) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $2.lexema);
                                                                     }else{
                                                                         $$.tipo = $2.tipo;
                                                                         $$.lista = $2.lista;
@@ -597,24 +597,24 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
           | OP_ADD_MI_ARITMETICA NUMERO {$$.tipo = $2.tipo;}    
           | ID OP_DECREMENTO EXPRESION                          {
                                                                     if(comprobarExistencia(&$1) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                                     }else{
                                                                         if($1.lista == 1 && $3.tipo == entero && $3.lista == 0){
                                                                             $$.tipo = $1.tipo;
                                                                             $$.lista = $1.lista;
                                                                         }else
-                                                                            printf("Error en linea %d: Operacion de tipos incompatibles en '--'. Requiere lista y entero. \n",yylineno);
+                                                                            printf("%s en linea %d: Operacion de tipos incompatibles en '--'. Requiere lista y entero. \n",error,yylineno);
                                                                     }
                                                                 }
           | ID OP_INCREMENTO VALOR OP_LIST_ARITMETICA EXPRESION    {
                                                                     if(comprobarExistencia(&$1) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                                     }else{
                                                                         if($1.lista == 1 && $4.tipo == 1 && $5.tipo == entero && $5.lista == 0){
                                                                             $$.tipo = $1.tipo;
                                                                             $$.lista = $1.lista;
                                                                         }else
-                                                                            printf("Error en linea %d: incorrecto de operador ternario.\n",yylineno);
+                                                                            printf("%s en linea %d: incorrecto de operador ternario.\n",error,yylineno);
                                                                     }
                                                                 }
           | INI_PARENTESIS EXPRESION FIN_PARENTESIS             {$$.tipo = $2.tipo; $$.lista = $2.lista;}
@@ -623,7 +623,7 @@ EXPRESION : EXPRESION OP_ADD_MI_ARITMETICA EXPRESION            {
           | LOGICO {$$.tipo = $1.tipo;}
           | ID                                                  {
                                                                     if(comprobarExistencia(&$1) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                                     }else{
                                                                         $$.tipo = $1.tipo;
                                                                         $$.lista = $1.lista;
@@ -640,7 +640,7 @@ VALOR : VALOR OP_ADD_MI_ARITMETICA VALOR            {
                                                                 $$.lista = $3.lista;
                                                                             
                                                         }else{
-                                                            printf("Error en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                            printf("%s en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",error,yylineno, $1.tipo, $3.tipo);
                                                         }
                                                     }
       | VALOR OP_ADD_MI_ARITMETICA error                {printf(", expected: 'EXPRESION'\n"); yyerrok;}
@@ -653,7 +653,7 @@ VALOR : VALOR OP_ADD_MI_ARITMETICA VALOR            {
                                                                 $$.lista = $3.lista;
                                 
                                                             }else{
-                                                                printf("Error en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                                printf("%s en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",error,yylineno, $1.tipo, $3.tipo);
                                                             }
                                                     }
       | VALOR OP_ADD_PL_ARITMETICA error                {printf(", expected: 'EXPRESION'\n"); yyerrok;}
@@ -666,7 +666,7 @@ VALOR : VALOR OP_ADD_MI_ARITMETICA VALOR            {
                                                                             $$.lista = $3.lista;
                                     
                                                                     }else{
-                                                                        printf("Error en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",yylineno, $1.tipo, $3.tipo);
+                                                                        printf("%s en linea %d: Operacion de tipos incompatibles en '-'. Tipos:%d y %d \n",error,yylineno, $1.tipo, $3.tipo);
                                                                     }
                                                                 }
       | VALOR OP_MULT_ARITMETICA error                  {printf(", expected: 'EXPRESION'\n"); yyerrok;}
@@ -706,22 +706,22 @@ VALOR : VALOR OP_ADD_MI_ARITMETICA VALOR            {
       | VALOR OP_IGUALDAD_LOGICO error                  {printf(", expected: 'EXPRESION'\n"); yyerrok;}
       | OP_UNARIO ID                                        {
                                                                     if(comprobarExistencia(&$2) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $2.lexema);
                                                                     }else{
                                                                         if(((strcmp($1.lexema,"?") == 0) || (strcmp($1.lexema,"#") == 0)) && $2.lista == 1){
                                                                             $$.tipo = $2.tipo;
                                                                             $$.lista = 0;
                                                                         }else{
-                                                                            printf("Error en linea %d: Uso incorrecto de operador '%s'.\n",yylineno, $1.lexema);
+                                                                            printf("%s en linea %d: Uso incorrecto de operador '%s'.\n",error,yylineno, $1.lexema);
                                                                         }
                                                                     }
                                                                 }
       | ID OP_UNARIO                                        {
                                                                     if(comprobarExistencia(&$1) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                                     }else{
                                                                         if(((strcmp($1.lexema,"?") == 0) || (strcmp($1.lexema,"#") == 0)))
-                                                                            printf("Error en linea %d: Uso incorrecto de operador '%s'.\n",yylineno, $1.lexema);
+                                                                            printf("%s en linea %d: Uso incorrecto de operador '%s'.\n",error,yylineno, $1.lexema);
                                                                         else{
                                                                             $$.tipo = $1.tipo;
                                                                             $$.lista = 0;
@@ -730,7 +730,7 @@ VALOR : VALOR OP_ADD_MI_ARITMETICA VALOR            {
                                                                 }
       | OP_ADD_MI_ARITMETICA ID                             {
                                                                     if(comprobarExistencia(&$2) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $2.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $2.lexema);
                                                                     }else{
                                                                         $$.tipo = $2.tipo;
                                                                         $$.lista = $2.lista;
@@ -740,13 +740,13 @@ VALOR : VALOR OP_ADD_MI_ARITMETICA VALOR            {
       | OP_ADD_MI_ARITMETICA NUMERO {$$.tipo = $2.tipo;}    
       | ID OP_DECREMENTO VALOR                          {
                                                                     if(comprobarExistencia(&$1) == 1){
-                                                                        printf("Error en linea %d: Uso de variable '%s' no definida.\n",yylineno, $1.lexema);
+                                                                        printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                                                     }else{
                                                                         if($1.lista == 1 && $3.tipo == entero && $3.lista == 0){
                                                                             $$.tipo = $1.tipo;
                                                                             $$.lista = $1.lista;
                                                                         }else
-                                                                            printf("Error en linea %d: Operacion de tipos incompatibles en '--'. Requiere lista y entero. \n",yylineno);
+                                                                            printf("%s en linea %d: Operacion de tipos incompatibles en '--'. Requiere lista y entero. \n",error,yylineno);
                                                                     }
                                                                 }
       | INI_PARENTESIS VALOR FIN_PARENTESIS
@@ -757,14 +757,14 @@ VALOR : VALOR OP_ADD_MI_ARITMETICA VALOR            {
 
 PROCEDIMIENTO : ID INI_PARENTESIS ARGUMENTOS FIN_PARENTESIS     {
                                                                     if(comprobarExistencia(&$1) == 1){
-                                                                        printf("Error en linea %d: Procedimiento '%s' no definido.\n",yylineno, $1.lexema);
+                                                                        printf("%s en linea %d: Procedimiento '%s' no definido.\n",error,yylineno, $1.lexema);
                                                                     }else{
                                                                         ComprobarNArgs($1.lexema, n_argumentos); n_argumentos=0;
                                                                     }
                                                                 }
               | ID INI_PARENTESIS FIN_PARENTESIS                {
                                                                     if(comprobarExistencia(&$1) == 1){
-                                                                        printf("Error en linea %d: Procedimiento '%s' no definido.\n",yylineno, $1.lexema);
+                                                                        printf("%s en linea %d: Procedimiento '%s' no definido.\n",error,yylineno, $1.lexema);
                                                                     }else{
                                                                         ComprobarNArgs($1.lexema, 0);
                                                                     }
@@ -775,20 +775,20 @@ PROCEDIMIENTO : ID INI_PARENTESIS ARGUMENTOS FIN_PARENTESIS     {
 
 ARGUMENTOS : ARGUMENTOS COMA ID     {
                                         if(comprobarExistencia(&$3) == 1){
-                                            printf("Error en linea %d: Procedimiento '%s' no definido.\n",yylineno, $1.lexema);
+                                            printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                         }else{
                                             tiposArgstmp[n_argumentos]=$3.tipo;
                                         }
                                         n_argumentos++;
 
                                         if(n_argumentos>=10){
-                                            printf("Error en linea %d: Demasiados argumentos en el procedimiento.\n",yylineno);
+                                            printf("%s en linea %d: Demasiados argumentos en el procedimiento.\n",error,yylineno);
                                             exit(-1);
                                         }
                                     }
            | ID                     {
                                         if(comprobarExistencia(&$1) == 1){
-                                            printf("Error en linea %d: Procedimiento '%s' no definido.\n",yylineno, $1.lexema);
+                                            printf("%s en linea %d: Uso de variable '%s' no definida.\n",error,yylineno, $1.lexema);
                                         }else{
                                             tiposArgstmp[0]=$1.tipo;
                                         }
@@ -803,14 +803,14 @@ EST_AGREGADO : INI_AGREGADO AGREGADOS FIN_AGREGADO {$$.tipo = $2.tipo;}
 
 AGREGADOS : AGREGADOS COMA EXPRESION    {
                                             if($1.tipo != $3.tipo){
-                                                printf("Error en linea %d: Mezcla de tipos en agregado.\n",yylineno);
+                                                printf("%s en linea %d: Mezcla de tipos en agregado.\n",error,yylineno);
                                             }else{
                                                     $$.tipo = $1.tipo;
                                             }
                                         }
           | EXPRESION                   {
                                             if($1.lista == 1){
-                                                printf("Error en linea %d: No se pueden emplear listas en los agregados.\n",yylineno);
+                                                printf("%s en linea %d: No se pueden emplear listas en los agregados.\n",error,yylineno);
                                             }else{
                                                 $$.tipo = $1.tipo;
                                             }
@@ -838,7 +838,6 @@ LOGICO : TRUE {$$.tipo = bool;}
 int main (int argc, char** argv) {
 
     yyparse();
-
 }
 
 void yyerror(const char* s){
