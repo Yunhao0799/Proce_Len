@@ -29,7 +29,7 @@ principal(){
         
     }   
 
-    elevarCuadrado(numero);   
+    elevarCuadrado(var1);   
 
     numero = (0.2 + (0.2 * 2.3))/10.7;
 

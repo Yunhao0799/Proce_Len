@@ -7,7 +7,7 @@
     int yylex();
     int yylineno;
     void yyerror(const char *s);
-    char* error = "\033[1;31mError: \033[0m";
+    char* error = "\033[1;31mError\033[0m";
 /* Inicio definicion de la tabla de simbolos */
 
 //enumerado para indicar los tipos de elementos en la tabla de simbolos
